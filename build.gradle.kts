@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.4.5"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("com.diffplug.spotless") version "7.0.3"
 }
 
 group = "com.ucan"
@@ -52,4 +53,11 @@ dependencyManagement {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+spotless {
+  java {
+    googleJavaFormat("1.26.0")
+    target("src/**/*.java")
+  }
 }
