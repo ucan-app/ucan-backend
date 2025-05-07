@@ -31,15 +31,8 @@ public class UserAuthControllerTest {
 
   @BeforeEach
   void setUp() {
-    // Prepare common test data
     validRegisterRequest = new RegisterRequest("testuser", "test@example.com", "password123");
-    expectedUserDTO =
-        new UserAuthDTO(
-            1L,
-            "testuser",
-            "test@example.com",
-            "encodedPassword",
-            true); // Assuming ID is generated and password encoded
+    expectedUserDTO = new UserAuthDTO(1L, "testuser", "test@example.com", "encodedPassword", true);
   }
 
   @Test
