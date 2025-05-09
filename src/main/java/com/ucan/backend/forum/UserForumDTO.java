@@ -8,7 +8,5 @@ public record UserForumDTO(
     String title,
     String description,
     UUID creatorId,
-    boolean isModerated,
     LocalDateTime createdAt,
-    LocalDateTime updatedAt
-) {} 
+    LocalDateTime updatedAt) {}
