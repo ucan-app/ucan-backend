@@ -1,14 +1,14 @@
-package com.ucan.backend.forum.mapper;
+package com.ucan.backend.post.mapper;
 
-import com.ucan.backend.forum.UserForumDTO;
-import com.ucan.backend.forum.model.UserForumEntity;
+import com.ucan.backend.post.UserPostDTO;
+import com.ucan.backend.post.model.UserPostEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserForumMapper {
+public class UserPostMapper {
 
-  public UserForumDTO toDTO(UserForumEntity entity) {
-    return new UserForumDTO(
+  public UserPostDTO toDTO(UserPostEntity entity) {
+    return new UserPostDTO(
         entity.getId(),
         entity.getTitle(),
         entity.getDescription(),
@@ -17,8 +17,8 @@ public class UserForumMapper {
         entity.getUpdatedAt());
   }
 
-  public UserForumEntity toEntity(UserForumDTO dto) {
-    UserForumEntity entity = new UserForumEntity();
+  public UserPostEntity toEntity(UserPostDTO dto) {
+    UserPostEntity entity = new UserPostEntity();
     entity.setId(dto.id());
     entity.setTitle(dto.title());
     entity.setDescription(dto.description());

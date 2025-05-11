@@ -1,16 +1,16 @@
-package com.ucan.backend.forum.mapper;
+package com.ucan.backend.post.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ucan.backend.forum.UserForumDTO;
-import com.ucan.backend.forum.model.UserForumEntity;
+import com.ucan.backend.post.UserPostDTO;
+import com.ucan.backend.post.model.UserPostEntity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-class UserForumMapperTest {
+class UserPostMapperTest {
 
-  private final UserForumMapper mapper = new UserForumMapper();
+  private final UserPostMapper mapper = new UserPostMapper();
 
   @Test
   void toDTO_ShouldMapAllFields() {
@@ -21,7 +21,7 @@ class UserForumMapperTest {
     String description = "Test Description";
     LocalDateTime now = LocalDateTime.now();
 
-    UserForumEntity entity = new UserForumEntity();
+    UserPostEntity entity = new UserPostEntity();
     entity.setId(id);
     entity.setTitle(title);
     entity.setDescription(description);
@@ -30,7 +30,7 @@ class UserForumMapperTest {
     entity.setUpdatedAt(now);
 
     // When
-    UserForumDTO dto = mapper.toDTO(entity);
+    UserPostDTO dto = mapper.toDTO(entity);
 
     // Then
     assertThat(dto.id()).isEqualTo(id);
@@ -50,10 +50,10 @@ class UserForumMapperTest {
     String description = "Test Description";
     LocalDateTime now = LocalDateTime.now();
 
-    UserForumDTO dto = new UserForumDTO(id, title, description, creatorId, now, now);
+    UserPostDTO dto = new UserPostDTO(id, title, description, creatorId, now, now);
 
     // When
-    UserForumEntity entity = mapper.toEntity(dto);
+    UserPostEntity entity = mapper.toEntity(dto);
 
     // Then
     assertThat(entity.getId()).isEqualTo(id);

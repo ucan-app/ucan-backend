@@ -1,4 +1,4 @@
-package com.ucan.backend.forum.model;
+package com.ucan.backend.post.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -9,10 +9,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "user_forums")
+@Table(name = "user_posts")
 @Getter
 @Setter
-public class UserForumEntity {
+public class UserPostEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
