@@ -45,8 +45,8 @@ public class SecurityConfig {
                 request.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
         .formLogin(form -> form.permitAll())
         .logout(logout -> logout.permitAll())
-        .csrf((csrf) -> csrf.disable());
-
+        .csrf((csrf) -> csrf.disable())
+        .cors();
     return http.build();
   }
 }
