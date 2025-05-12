@@ -8,41 +8,56 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-@DataJpaTest
+@SpringBootTest
+@Testcontainers
+@Transactional
 class UserPostRepositoryTest {
 
-  @Autowired private TestEntityManager entityManager;
+  @Container
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
-  @Autowired private UserPostRepository forumRepository;
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgres::getJdbcUrl);
+    registry.add("spring.datasource.username", postgres::getUsername);
+    registry.add("spring.datasource.password", postgres::getPassword);
+  }
+
+  @Autowired private UserPostRepository postRepository;
 
   @Test
-  void findByCreatorId_ShouldReturnForums() {
+  void findByCreatorId_ShouldReturnPosts() {
     // Given
     UUID creatorId = UUID.randomUUID();
-    UserPostEntity forum1 = createForum("Forum 1", "Description 1", creatorId);
-    UserPostEntity forum2 = createForum("Forum 2", "Description 2", creatorId);
-    UserPostEntity forum3 = createForum("Forum 3", "Description 3", UUID.randomUUID());
+    UserPostEntity post1 = createPost("Post 1", "Description 1", creatorId);
+    UserPostEntity post2 = createPost("Post 2", "Description 2", creatorId);
+    UserPostEntity post3 = createPost("Post 3", "Description 3", UUID.randomUUID());
 
     // When
-    List<UserPostEntity> result = forumRepository.findByCreatorId(creatorId);
+    List<UserPostEntity> result = postRepository.findByCreatorId(creatorId);
 
     // Then
     assertThat(result).hasSize(2);
     assertThat(result)
         .extracting(UserPostEntity::getTitle)
-        .containsExactlyInAnyOrder("Forum 1", "Forum 2");
+        .containsExactlyInAnyOrder("Post 1", "Post 2");
   }
 
-  private UserPostEntity createForum(String title, String description, UUID creatorId) {
-    UserPostEntity forum = new UserPostEntity();
-    forum.setTitle(title);
-    forum.setDescription(description);
-    forum.setCreatorId(creatorId);
-    forum.setCreatedAt(LocalDateTime.now());
-    forum.setUpdatedAt(LocalDateTime.now());
-    return entityManager.persist(forum);
+  private UserPostEntity createPost(String title, String description, UUID creatorId) {
+    UserPostEntity post = new UserPostEntity();
+    post.setTitle(title);
+    post.setDescription(description);
+    post.setCreatorId(creatorId);
+    post.setCreatedAt(LocalDateTime.now());
+    post.setUpdatedAt(LocalDateTime.now());
+    return postRepository.save(post);
   }
 }

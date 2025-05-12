@@ -72,4 +72,16 @@ public class UserPostService implements UserPostAPI {
 
     return postMapper.toDTO(postRepository.save(post));
   }
+
+  // TODO: Implement these methods when post functionality is added
+  @Override
+  public List<UserPostDTO> getAllPosts() {
+    return List.of();
+  }
+
+  // TODO: Implement these methods when post functionality is added
+  @Override
+  public List<UserPostDTO> getPostsByTag(String tag) {
+    return List.of();
+  }
 }
