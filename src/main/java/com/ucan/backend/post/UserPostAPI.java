@@ -13,4 +13,10 @@ public interface UserPostAPI {
   void deletePost(UUID forumId);
 
   UserPostDTO updatePost(UUID forumId, String title, String description);
+
+  // TODO: Implement these methods when post functionality is added
+  List<UserPostDTO> getAllPosts();
+
+  // TODO: Implement these methods when post functionality is added
+  List<UserPostDTO> getPostsByTag(String tag);
 }
