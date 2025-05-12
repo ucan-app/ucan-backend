@@ -1,5 +1,7 @@
-package com.ucan.backend.userprofile;
+package com.ucan.backend.gateway.controller;
 
+import com.ucan.backend.userprofile.UserProfileAPI;
+import com.ucan.backend.userprofile.UserProfileDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
