@@ -1,11 +1,17 @@
 package com.ucan.backend.gateway.controller;
 
+import com.ucan.backend.config.CustomUserDetails;
 import com.ucan.backend.gateway.dto.ErrorResponse;
+import com.ucan.backend.gateway.dto.userauth.LoginRequest;
 import com.ucan.backend.gateway.dto.userauth.RegisterRequest;
 import com.ucan.backend.userauth.UserAuthAPI;
 import com.ucan.backend.userauth.UserAuthDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAuthController {
 
   private final UserAuthAPI userAuthService;
+  private final AuthenticationManager authenticationManager;
 
   @PostMapping("/register")
   public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -29,5 +36,27 @@ public class UserAuthController {
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
     }
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    try {
+      Authentication authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+      return ResponseEntity.ok(userDetails.getUserId());
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(new ErrorResponse("Invalid username or password"));
+    }
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<?> logout() {
+    SecurityContextHolder.clearContext();
+    return ResponseEntity.ok().build();
   }
 }
