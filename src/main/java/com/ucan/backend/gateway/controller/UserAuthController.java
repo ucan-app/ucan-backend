@@ -6,6 +6,8 @@ import com.ucan.backend.gateway.dto.userauth.LoginRequest;
 import com.ucan.backend.gateway.dto.userauth.RegisterRequest;
 import com.ucan.backend.userauth.UserAuthAPI;
 import com.ucan.backend.userauth.UserAuthDTO;
+import com.ucan.backend.userprofile.UserProfileDTO;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +39,7 @@ public class UserAuthController {
       return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
     }
   }
+
 
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody LoginRequest request) {
