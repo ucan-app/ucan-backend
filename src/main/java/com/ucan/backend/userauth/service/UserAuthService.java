@@ -2,6 +2,8 @@ package com.ucan.backend.userauth.service;
 
 import com.ucan.backend.userauth.*;
 import com.ucan.backend.userauth.mapper.UserAuthMapper;
+import com.ucan.backend.userauth.model.BadgeEntity;
+import com.ucan.backend.userauth.model.BadgeId;
 import com.ucan.backend.userauth.model.UserAuthEntity;
 import com.ucan.backend.userauth.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,49 @@ public class UserAuthService implements UserAuthAPI {
             savedDTO.id(), savedDTO.username(), savedDTO.email(), savedEntity.getCreatedAt()));
 
     return savedDTO;
+  }
+
+  @Override
+  public void addBadge(Long userId, BadgeDTO badgeDTO) {
+    UserAuthEntity user =
+        userAuthRepository
+            .findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    if (userAuthRepository.existsBadgeByUserIdAndOrganization(
+        userId, badgeDTO.organizationName())) {
+      throw new IllegalArgumentException("Badge already exists for this user");
+    }
+
+    BadgeEntity badge =
+        BadgeEntity.builder()
+            .id(
+                BadgeId.builder()
+                    .userId(userId)
+                    .organizationName(badgeDTO.organizationName())
+                    .build())
+            .validated(badgeDTO.validated())
+            .user(user)
+            .build();
+
+    user.getBadges().add(badge);
+    userAuthRepository.save(user);
+  }
+
+  @Override
+  public void removeBadge(Long userId, BadgeDTO badgeDTO) {
+    BadgeEntity badge =
+        userAuthRepository
+            .findBadgeByUserIdAndOrganization(userId, badgeDTO.organizationName())
+            .orElseThrow(() -> new IllegalArgumentException("Badge not found"));
+
+    if (badge.isValidated()) {
+      throw new IllegalStateException("Cannot remove a validated badge");
+    }
+
+    UserAuthEntity user = badge.getUser();
+    user.getBadges().remove(badge);
+    userAuthRepository.save(user);
   }
 
   @Override

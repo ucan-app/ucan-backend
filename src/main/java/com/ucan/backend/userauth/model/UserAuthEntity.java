@@ -2,6 +2,8 @@ package com.ucan.backend.userauth.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +35,10 @@ public class UserAuthEntity {
 
   @Column(name = "created_at")
   private Instant createdAt;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<BadgeEntity> badges = new ArrayList<>();
 
   @PrePersist
   protected void onCreate() {

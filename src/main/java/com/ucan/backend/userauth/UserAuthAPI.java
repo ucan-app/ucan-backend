@@ -10,4 +10,8 @@ public interface UserAuthAPI {
   boolean existsByUsername(String username);
 
   boolean existsByEmail(String email);
+
+  void addBadge(Long userId, BadgeDTO badgeDTO);
+
+  void removeBadge(Long userId, BadgeDTO badgeDTO);
 }
