@@ -8,6 +8,7 @@ import com.ucan.backend.userauth.UserAuthAPI;
 import com.ucan.backend.userauth.UserAuthDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,7 +33,13 @@ public class UserAuthController {
   public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
     try {
       UserAuthDTO userDTO =
-          new UserAuthDTO(null, request.username(), request.email(), request.password(), true);
+          new UserAuthDTO(
+              null,
+              request.username(),
+              request.email(),
+              request.password(),
+              true,
+              new ArrayList<>());
 
       UserAuthDTO createdUser = userAuthService.createUser(userDTO);
       return ResponseEntity.ok(createdUser);
