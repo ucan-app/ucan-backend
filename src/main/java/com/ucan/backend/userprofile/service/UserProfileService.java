@@ -5,12 +5,11 @@ import com.ucan.backend.userprofile.*;
 import com.ucan.backend.userprofile.mapper.UserProfileMapper;
 import com.ucan.backend.userprofile.model.UserProfileEntity;
 import com.ucan.backend.userprofile.repository.UserProfileRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Transactional
