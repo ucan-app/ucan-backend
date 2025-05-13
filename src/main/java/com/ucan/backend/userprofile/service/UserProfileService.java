@@ -10,6 +10,8 @@ import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -27,7 +29,24 @@ public class UserProfileService implements UserProfileAPI {
 
   @Override
   public UserProfileDTO createOrUpdateProfile(UserProfileDTO dto) {
-    UserProfileEntity entity = mapper.toEntity(dto);
+    // try to find an existing profile for the given userId
+    Optional<UserProfileEntity> optionalEntity = repository.findByUserId(dto.userId());
+    UserProfileEntity entity;
+
+    if (optionalEntity.isPresent()) {
+      // Update the existing entity with new values
+      entity = optionalEntity.get();
+      entity.setFullName(dto.fullName());
+      entity.setLinkedinUrl(dto.linkedinUrl());
+      entity.setPersonalWebsite(dto.personalWebsite());
+      entity.setBio(dto.bio());
+      entity.setGraduationYear(dto.graduationYear());
+      entity.setBadges(dto.badges());
+      // No need to update createdAt
+    } else {
+      // No profile exists yet and create a new one using the mapper.
+      entity = mapper.toEntity(dto);
+    }
     return mapper.toDTO(repository.save(entity));
   }
 
