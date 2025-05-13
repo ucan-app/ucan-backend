@@ -6,12 +6,15 @@ import com.ucan.backend.gateway.dto.userauth.LoginRequest;
 import com.ucan.backend.gateway.dto.userauth.RegisterRequest;
 import com.ucan.backend.userauth.UserAuthAPI;
 import com.ucan.backend.userauth.UserAuthDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,13 +42,19 @@ public class UserAuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+  public ResponseEntity<?> login(
+      @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
     try {
       Authentication authentication =
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
       SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      HttpSession session = httpRequest.getSession(true);
+      session.setAttribute(
+          HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+          SecurityContextHolder.getContext());
 
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       return ResponseEntity.ok(userDetails.getUserId());
