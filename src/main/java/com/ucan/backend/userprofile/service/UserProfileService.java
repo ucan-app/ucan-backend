@@ -1,10 +1,12 @@
 package com.ucan.backend.userprofile.service;
 
+import com.ucan.backend.userauth.NewUserCreatedEvent;
 import com.ucan.backend.userprofile.*;
 import com.ucan.backend.userprofile.mapper.UserProfileMapper;
 import com.ucan.backend.userprofile.model.UserProfileEntity;
 import com.ucan.backend.userprofile.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,13 @@ public class UserProfileService implements UserProfileAPI {
 
   private final UserProfileRepository repository;
   private final UserProfileMapper mapper;
+
+  @ApplicationModuleListener
+  public void onNewUserCreated(NewUserCreatedEvent event) {
+    UserProfileEntity entity =
+        UserProfileEntity.builder().userId(event.userId()).fullName(event.username()).build();
+    repository.save(entity);
+  }
 
   @Override
   public UserProfileDTO createOrUpdateProfile(UserProfileDTO dto) {
