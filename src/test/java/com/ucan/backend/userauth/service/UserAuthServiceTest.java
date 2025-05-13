@@ -41,6 +41,7 @@ class UserAuthServiceTest {
 
   private UserAuthDTO testUserDTO;
   private UserAuthEntity testUserEntity;
+  private BadgeDTO testBadgeDTO;
 
   @BeforeEach
   void setUp() {
@@ -56,6 +57,8 @@ class UserAuthServiceTest {
             .enabled(true)
             .createdAt(Instant.now())
             .build();
+
+    testBadgeDTO = new BadgeDTO("UW", false);
   }
 
   @Test
@@ -216,5 +219,102 @@ class UserAuthServiceTest {
     boolean result = userAuthService.existsByEmail(testUserDTO.email());
 
     assertFalse(result);
+  }
+
+  @Test
+  void addBadge_Success() {
+    // Arrange
+    when(userAuthRepository.findById(1L)).thenReturn(Optional.of(testUserEntity));
+    when(userAuthRepository.existsBadgeByUserIdAndOrganization(1L, "UW")).thenReturn(false);
+
+    // Act
+    userAuthService.addBadge(1L, testBadgeDTO);
+
+    // Assert
+    verify(userAuthRepository).save(testUserEntity);
+    assertEquals(1, testUserEntity.getBadges().size());
+    assertEquals("UW", testUserEntity.getBadges().get(0).getId().getOrganizationName());
+    assertFalse(testUserEntity.getBadges().get(0).isValidated());
+  }
+
+  @Test
+  void addBadge_UserNotFound() {
+    // Arrange
+    when(userAuthRepository.findById(1L)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> userAuthService.addBadge(1L, testBadgeDTO),
+        "Should throw when user not found");
+  }
+
+  @Test
+  void addBadge_BadgeAlreadyExists() {
+    // Arrange
+    when(userAuthRepository.findById(1L)).thenReturn(Optional.of(testUserEntity));
+    when(userAuthRepository.existsBadgeByUserIdAndOrganization(1L, "UW")).thenReturn(true);
+
+    // Act & Assert
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> userAuthService.addBadge(1L, testBadgeDTO),
+        "Should throw when badge already exists");
+  }
+
+  @Test
+  void removeBadge_Success() {
+    // Arrange
+    BadgeEntity badge =
+        BadgeEntity.builder()
+            .id(BadgeId.builder().userId(1L).organizationName("UW").build())
+            .validated(false)
+            .user(testUserEntity)
+            .build();
+    testUserEntity.getBadges().add(badge);
+
+    when(userAuthRepository.findBadgeByUserIdAndOrganization(1L, "UW"))
+        .thenReturn(Optional.of(badge));
+
+    // Act
+    userAuthService.removeBadge(1L, testBadgeDTO);
+
+    // Assert
+    verify(userAuthRepository).save(testUserEntity);
+    assertTrue(testUserEntity.getBadges().isEmpty());
+  }
+
+  @Test
+  void removeBadge_BadgeNotFound() {
+    // Arrange
+    when(userAuthRepository.findBadgeByUserIdAndOrganization(1L, "UW"))
+        .thenReturn(Optional.empty());
+
+    // Act & Assert
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> userAuthService.removeBadge(1L, testBadgeDTO),
+        "Should throw when badge not found");
+  }
+
+  @Test
+  void removeBadge_ValidatedBadge() {
+    // Arrange
+    BadgeEntity badge =
+        BadgeEntity.builder()
+            .id(BadgeId.builder().userId(1L).organizationName("UW").build())
+            .validated(true)
+            .user(testUserEntity)
+            .build();
+    testUserEntity.getBadges().add(badge);
+
+    when(userAuthRepository.findBadgeByUserIdAndOrganization(1L, "UW"))
+        .thenReturn(Optional.of(badge));
+
+    // Act & Assert
+    assertThrows(
+        IllegalStateException.class,
+        () -> userAuthService.removeBadge(1L, testBadgeDTO),
+        "Should throw when trying to remove validated badge");
   }
 }
