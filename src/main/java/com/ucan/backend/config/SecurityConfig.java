@@ -54,8 +54,8 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             request ->
-                //request.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
-                request.requestMatchers("/**").permitAll())
+                request.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
+                //request.requestMatchers("/**").permitAll())
         .formLogin(form -> form.disable())
         .logout(logout -> logout.permitAll())
         .csrf((csrf) -> csrf.disable())
