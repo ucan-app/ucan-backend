@@ -20,3 +20,4 @@ public interface UserPostAPI {
   // TODO: Implement these methods when post functionality is added
   List<UserPostDTO> getPostsByTag(String tag);
 }
+
