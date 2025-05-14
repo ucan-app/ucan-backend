@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.ucan.backend.post.model.UserPostEntity;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,10 +35,10 @@ class UserPostRepositoryTest {
   @Test
   void findByCreatorId_ShouldReturnPosts() {
     // Given
-    UUID creatorId = UUID.randomUUID();
+    Long creatorId = 1L;
     UserPostEntity post1 = createPost("Post 1", "Description 1", creatorId);
     UserPostEntity post2 = createPost("Post 2", "Description 2", creatorId);
-    UserPostEntity post3 = createPost("Post 3", "Description 3", UUID.randomUUID());
+    UserPostEntity post3 = createPost("Post 3", "Description 3", 2L);
 
     // When
     List<UserPostEntity> result = postRepository.findByCreatorId(creatorId);
@@ -51,7 +50,7 @@ class UserPostRepositoryTest {
         .containsExactlyInAnyOrder("Post 1", "Post 2");
   }
 
-  private UserPostEntity createPost(String title, String description, UUID creatorId) {
+  private UserPostEntity createPost(String title, String description, Long creatorId) {
     UserPostEntity post = new UserPostEntity();
     post.setTitle(title);
     post.setDescription(description);

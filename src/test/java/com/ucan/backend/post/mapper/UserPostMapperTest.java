@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.ucan.backend.post.UserPostDTO;
 import com.ucan.backend.post.model.UserPostEntity;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class UserPostMapperTest {
@@ -15,8 +14,8 @@ class UserPostMapperTest {
   @Test
   void toDTO_ShouldMapAllFields() {
     // Given
-    UUID id = UUID.randomUUID();
-    UUID creatorId = UUID.randomUUID();
+    Long id = 1L;
+    Long creatorId = 2L;
     String title = "Test Forum";
     String description = "Test Description";
     LocalDateTime now = LocalDateTime.now();
@@ -44,8 +43,8 @@ class UserPostMapperTest {
   @Test
   void toEntity_ShouldMapAllFields() {
     // Given
-    UUID id = UUID.randomUUID();
-    UUID creatorId = UUID.randomUUID();
+    Long id = 1L;
+    Long creatorId = 2L;
     String title = "Test Forum";
     String description = "Test Description";
     LocalDateTime now = LocalDateTime.now();
