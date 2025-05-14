@@ -41,7 +41,6 @@ public class UserAuthController {
     }
   }
 
-
   @PostMapping("/login")
   public ResponseEntity<?> login(
       @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
