@@ -1,12 +1,11 @@
 package com.ucan.backend.post;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public record UserPostDTO(
-    UUID id,
+    Long id,
     String title,
     String description,
-    UUID creatorId,
+    Long creatorId,
     LocalDateTime createdAt,
     LocalDateTime updatedAt) {}

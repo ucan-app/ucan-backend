@@ -1,21 +1,20 @@
 package com.ucan.backend.post;
 
 import java.util.List;
-import java.util.UUID;
+import org.springframework.data.domain.Page;
 
 public interface UserPostAPI {
-  UserPostDTO createPost(String title, String description, UUID creatorId);
+  UserPostDTO createPost(String title, String description, Long creatorId);
 
-  UserPostDTO getPost(UUID forumId);
+  UserPostDTO getPost(Long postId);
 
-  List<UserPostDTO> getPostsByCreator(UUID creatorId);
+  List<UserPostDTO> getPostsByCreator(Long creatorId);
 
-  void deletePost(UUID forumId);
+  void deletePost(Long postId);
 
-  UserPostDTO updatePost(UUID forumId, String title, String description);
+  UserPostDTO updatePost(Long postId, String title, String description);
 
-  // TODO: Implement these methods when post functionality is added
-  List<UserPostDTO> getAllPosts();
+  Page<UserPostDTO> getAllPosts(int page, int size);
 
   // TODO: Implement these methods when post functionality is added
   List<UserPostDTO> getPostsByTag(String tag);
