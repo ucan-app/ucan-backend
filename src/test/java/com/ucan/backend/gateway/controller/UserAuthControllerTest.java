@@ -2,6 +2,7 @@ package com.ucan.backend.gateway.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import com.ucan.backend.gateway.dto.ErrorResponse;
 import com.ucan.backend.gateway.dto.userauth.RegisterRequest;
 import com.ucan.backend.userauth.UserAuthAPI;
 import com.ucan.backend.userauth.UserAuthDTO;
+import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +34,9 @@ public class UserAuthControllerTest {
   @BeforeEach
   void setUp() {
     validRegisterRequest = new RegisterRequest("testuser", "test@example.com", "password123");
-    expectedUserDTO = new UserAuthDTO(1L, "testuser", "test@example.com", "encodedPassword", true);
+    expectedUserDTO =
+        new UserAuthDTO(
+            1L, "testuser", "test@example.com", "encodedPassword", true, new ArrayList<>());
   }
 
   @Test
@@ -60,5 +64,24 @@ public class UserAuthControllerTest {
 
     // Verify that createUser was called
     verify(mockUserAuthService).createUser(any(UserAuthDTO.class));
+  }
+
+  @Test
+  void register_Success() {
+    // Arrange
+    when(mockUserAuthService.createUser(any(UserAuthDTO.class))).thenReturn(expectedUserDTO);
+
+    // Act
+    ResponseEntity<?> responseEntity = userAuthController.register(validRegisterRequest);
+
+    // Assert
+    assertNotNull(responseEntity, "Response entity should not be null");
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode(), "HTTP status should be OK");
+
+    UserAuthDTO responseBody = (UserAuthDTO) responseEntity.getBody();
+    assertNotNull(responseBody, "Response body should not be null");
+    assertEquals(expectedUserDTO.username(), responseBody.username());
+    assertEquals(expectedUserDTO.email(), responseBody.email());
+    assertTrue(responseBody.badges().isEmpty());
   }
 }
