@@ -7,9 +7,10 @@ import com.ucan.backend.post.mapper.UserPostMapper;
 import com.ucan.backend.post.model.UserPostEntity;
 import com.ucan.backend.post.repository.UserPostRepository;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +23,7 @@ public class UserPostService implements UserPostAPI {
 
   @Override
   @Transactional
-  public UserPostDTO createPost(String title, String description, UUID creatorId) {
+  public UserPostDTO createPost(String title, String description, Long creatorId) {
     UserPostEntity post = new UserPostEntity();
     post.setTitle(title);
     post.setDescription(description);
@@ -42,7 +43,7 @@ public class UserPostService implements UserPostAPI {
 
   @Override
   @Transactional(readOnly = true)
-  public UserPostDTO getPost(UUID postId) {
+  public UserPostDTO getPost(Long postId) {
     return postRepository
         .findById(postId)
         .map(postMapper::toDTO)
@@ -51,19 +52,19 @@ public class UserPostService implements UserPostAPI {
 
   @Override
   @Transactional(readOnly = true)
-  public List<UserPostDTO> getPostsByCreator(UUID creatorId) {
+  public List<UserPostDTO> getPostsByCreator(Long creatorId) {
     return postRepository.findByCreatorId(creatorId).stream().map(postMapper::toDTO).toList();
   }
 
   @Override
   @Transactional
-  public void deletePost(UUID postId) {
+  public void deletePost(Long postId) {
     postRepository.deleteById(postId);
   }
 
   @Override
   @Transactional
-  public UserPostDTO updatePost(UUID postId, String title, String description) {
+  public UserPostDTO updatePost(Long postId, String title, String description) {
     UserPostEntity post =
         postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
 
@@ -73,10 +74,11 @@ public class UserPostService implements UserPostAPI {
     return postMapper.toDTO(postRepository.save(post));
   }
 
-  // TODO: Implement these methods when post functionality is added
   @Override
-  public List<UserPostDTO> getAllPosts() {
-    return List.of();
+  @Transactional(readOnly = true)
+  public Page<UserPostDTO> getAllPosts(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size);
+    return postRepository.findAllByOrderByCreatedAtDesc(pageRequest).map(postMapper::toDTO);
   }
 
   // TODO: Implement these methods when post functionality is added

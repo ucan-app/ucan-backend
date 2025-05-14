@@ -2,7 +2,6 @@ package com.ucan.backend.post.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,8 +13,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Setter
 public class UserPostEntity {
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   @Column(nullable = false)
   private String title;
@@ -24,7 +23,7 @@ public class UserPostEntity {
   private String description;
 
   @Column(name = "creator_id", nullable = false)
-  private UUID creatorId;
+  private Long creatorId;
 
   @Column(name = "is_moderated", nullable = false)
   private boolean isModerated;

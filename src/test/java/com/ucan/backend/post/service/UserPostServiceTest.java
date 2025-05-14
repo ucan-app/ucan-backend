@@ -13,7 +13,6 @@ import com.ucan.backend.post.repository.UserPostRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,8 +42,8 @@ class UserPostServiceTest {
     // Given
     String title = "Test Post";
     String description = "Test Description";
-    UUID creatorId = UUID.randomUUID();
-    UUID postId = UUID.randomUUID();
+    Long creatorId = 1L;
+    Long postId = 1L;
     LocalDateTime now = LocalDateTime.now();
 
     UserPostEntity entity = new UserPostEntity();
@@ -75,11 +74,10 @@ class UserPostServiceTest {
   @Test
   void getPost_WhenExists_ShouldReturnPost() {
     // Given
-    UUID postId = UUID.randomUUID();
+    Long postId = 1L;
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
-        new UserPostDTO(
-            postId, "Test", "Desc", UUID.randomUUID(), LocalDateTime.now(), LocalDateTime.now());
+        new UserPostDTO(postId, "Test", "Desc", 2L, LocalDateTime.now(), LocalDateTime.now());
 
     when(postRepository.findById(postId)).thenReturn(Optional.of(entity));
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -94,7 +92,7 @@ class UserPostServiceTest {
   @Test
   void getPost_WhenNotExists_ShouldThrowException() {
     // Given
-    UUID postId = UUID.randomUUID();
+    Long postId = 1L;
     when(postRepository.findById(postId)).thenReturn(Optional.empty());
 
     // When/Then
@@ -106,11 +104,10 @@ class UserPostServiceTest {
   @Test
   void getPostsByCreator_ShouldReturnList() {
     // Given
-    UUID creatorId = UUID.randomUUID();
+    Long creatorId = 1L;
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
-        new UserPostDTO(
-            UUID.randomUUID(), "Test", "Desc", creatorId, LocalDateTime.now(), LocalDateTime.now());
+        new UserPostDTO(2L, "Test", "Desc", creatorId, LocalDateTime.now(), LocalDateTime.now());
 
     when(postRepository.findByCreatorId(creatorId)).thenReturn(List.of(entity));
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -126,7 +123,7 @@ class UserPostServiceTest {
   @Test
   void deletePost_ShouldDelete() {
     // Given
-    UUID postId = UUID.randomUUID();
+    Long postId = 1L;
 
     // When
     postService.deletePost(postId);
@@ -138,18 +135,13 @@ class UserPostServiceTest {
   @Test
   void updatePost_WhenExists_ShouldUpdate() {
     // Given
-    UUID postId = UUID.randomUUID();
+    Long postId = 1L;
     String newTitle = "New Title";
     String newDescription = "New Description";
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
         new UserPostDTO(
-            postId,
-            newTitle,
-            newDescription,
-            UUID.randomUUID(),
-            LocalDateTime.now(),
-            LocalDateTime.now());
+            postId, newTitle, newDescription, 2L, LocalDateTime.now(), LocalDateTime.now());
 
     when(postRepository.findById(postId)).thenReturn(Optional.of(entity));
     when(postRepository.save(entity)).thenReturn(entity);
@@ -167,7 +159,7 @@ class UserPostServiceTest {
   @Test
   void updatePost_WhenNotExists_ShouldThrowException() {
     // Given
-    UUID postId = UUID.randomUUID();
+    Long postId = 1L;
     when(postRepository.findById(postId)).thenReturn(Optional.empty());
 
     // When/Then
