@@ -47,4 +47,16 @@ public class UserPostController {
       @PathVariable Long postId, @RequestParam String title, @RequestParam String description) {
     return ResponseEntity.ok(postService.updatePost(postId, title, description));
   }
+
+  @PatchMapping("/{postId}/upvote")
+  public ResponseEntity<Void> upvotePost(@PathVariable Long postId) {
+    postService.upvotePost(postId);
+    return ResponseEntity.ok().build();
+  }
+
+  @PatchMapping("/{postId}/downvote")
+  public ResponseEntity<Void> downvotePost(@PathVariable Long postId) {
+    postService.downvotePost(postId);
+    return ResponseEntity.ok().build();
+  }
 }

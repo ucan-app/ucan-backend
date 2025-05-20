@@ -26,6 +26,8 @@ public class UserPostService implements UserPostAPI {
   public UserPostDTO createPost(String title, String description, Long creatorId) {
     UserPostEntity post = new UserPostEntity();
     post.setTitle(title);
+    post.setUpvote(0);
+    post.setDownvote(0);
     post.setDescription(description);
     post.setCreatorId(creatorId);
     UserPostEntity savedPost = postRepository.save(post);
@@ -35,6 +37,8 @@ public class UserPostService implements UserPostAPI {
         new NewPostCreated(
             savedPost.getId(),
             savedPost.getTitle(),
+            savedPost.getUpvote(),
+            savedPost.getDownvote(),
             savedPost.getCreatorId(),
             savedPost.getCreatedAt()));
 
@@ -85,5 +89,21 @@ public class UserPostService implements UserPostAPI {
   @Override
   public List<UserPostDTO> getPostsByTag(String tag) {
     return List.of();
+  }
+
+  @Transactional
+  public void upvotePost(Long postId) {
+    UserPostEntity post =
+        postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+    post.setUpvote(post.getUpvote() + 1);
+    postRepository.save(post);
+  }
+
+  @Transactional
+  public void downvotePost(Long postId) {
+    UserPostEntity post =
+        postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+    post.setDownvote(post.getDownvote() + 1);
+    postRepository.save(post);
   }
 }

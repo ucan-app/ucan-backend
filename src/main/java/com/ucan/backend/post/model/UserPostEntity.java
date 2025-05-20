@@ -19,6 +19,12 @@ public class UserPostEntity {
   @Column(nullable = false)
   private String title;
 
+  @Column(nullable = false)
+  private int upvote = 0;
+
+  @Column(nullable = false)
+  private int downvote = 0;
+
   @Column(length = 1000)
   private String description;
 
