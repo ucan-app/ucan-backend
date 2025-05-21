@@ -19,7 +19,7 @@ public interface UserPostAPI {
   // TODO: Implement these methods when post functionality is added
   List<UserPostDTO> getPostsByTag(String tag);
 
+  // upvotePost and downvotePost to the public API interface for modular access
   void upvotePost(Long postId);
-
   void downvotePost(Long postId);
 }
