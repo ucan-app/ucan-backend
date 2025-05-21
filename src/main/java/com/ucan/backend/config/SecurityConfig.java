@@ -33,7 +33,11 @@ public class SecurityConfig {
         throw new UsernameNotFoundException("User not found with username: " + username);
       }
       return new CustomUserDetails(
-          userDTO.id(), userDTO.username(), userDTO.password(), userDTO.enabled());
+          userDTO.id(),
+          userDTO.username(),
+          userDTO.password(),
+          userDTO.enabled(),
+          userDTO.badges());
     };
   }
 
