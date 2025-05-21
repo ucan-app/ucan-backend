@@ -41,6 +41,8 @@ class UserPostServiceTest {
   void createPost_ShouldCreateAndPublishEvent() {
     // Given
     String title = "Test Post";
+    int upvote = 6;
+    int downvote = 2;
     String description = "Test Description";
     Long creatorId = 1L;
     Long postId = 1L;
@@ -49,12 +51,15 @@ class UserPostServiceTest {
     UserPostEntity entity = new UserPostEntity();
     entity.setId(postId);
     entity.setTitle(title);
+    entity.setUpvote(upvote);
+    entity.setDownvote(downvote);
     entity.setDescription(description);
     entity.setCreatorId(creatorId);
     entity.setCreatedAt(now);
     entity.setUpdatedAt(now);
 
-    UserPostDTO dto = new UserPostDTO(postId, title, description, creatorId, now, now);
+    UserPostDTO dto =
+        new UserPostDTO(postId, title, upvote, downvote, description, creatorId, now, now);
 
     when(postRepository.save(any(UserPostEntity.class))).thenReturn(entity);
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -77,7 +82,7 @@ class UserPostServiceTest {
     Long postId = 1L;
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
-        new UserPostDTO(postId, "Test", "Desc", 2L, LocalDateTime.now(), LocalDateTime.now());
+        new UserPostDTO(postId, "Test", 6, 2, "Desc", 2L, LocalDateTime.now(), LocalDateTime.now());
 
     when(postRepository.findById(postId)).thenReturn(Optional.of(entity));
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -107,7 +112,8 @@ class UserPostServiceTest {
     Long creatorId = 1L;
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
-        new UserPostDTO(2L, "Test", "Desc", creatorId, LocalDateTime.now(), LocalDateTime.now());
+        new UserPostDTO(
+            2L, "Test", 6, 2, "Desc", creatorId, LocalDateTime.now(), LocalDateTime.now());
 
     when(postRepository.findByCreatorId(creatorId)).thenReturn(List.of(entity));
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -141,7 +147,7 @@ class UserPostServiceTest {
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
         new UserPostDTO(
-            postId, newTitle, newDescription, 2L, LocalDateTime.now(), LocalDateTime.now());
+            postId, newTitle, 6, 2, newDescription, 2L, LocalDateTime.now(), LocalDateTime.now());
 
     when(postRepository.findById(postId)).thenReturn(Optional.of(entity));
     when(postRepository.save(entity)).thenReturn(entity);
@@ -164,6 +170,62 @@ class UserPostServiceTest {
 
     // When/Then
     assertThatThrownBy(() -> postService.updatePost(postId, "New Title", "New Description"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessage("Post not found");
+  }
+
+  @Test
+  void upvotePost_ShouldIncrementUpvote() {
+    // Given
+    Long postId = 1L;
+    UserPostEntity post = new UserPostEntity();
+    post.setUpvote(2);
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    // When
+    postService.upvotePost(postId);
+
+    // Then
+    assertThat(post.getUpvote()).isEqualTo(3);
+    verify(postRepository).save(post);
+  }
+
+  @Test
+  void downvotePost_ShouldIncrementDownvote() {
+    // Given
+    Long postId = 2L;
+    UserPostEntity post = new UserPostEntity();
+    post.setDownvote(4);
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    // When
+    postService.downvotePost(postId);
+
+    // Then
+    assertThat(post.getDownvote()).isEqualTo(5);
+    verify(postRepository).save(post);
+  }
+
+  @Test
+  void upvotePost_WhenPostNotFound_ShouldThrowException() {
+    // Given
+    Long postId = 99L;
+    when(postRepository.findById(postId)).thenReturn(Optional.empty());
+
+    // Then
+    assertThatThrownBy(() -> postService.upvotePost(postId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessage("Post not found");
+  }
+
+  @Test
+  void downvotePost_WhenPostNotFound_ShouldThrowException() {
+    // Given
+    Long postId = 100L;
+    when(postRepository.findById(postId)).thenReturn(Optional.empty());
+
+    // Then
+    assertThatThrownBy(() -> postService.downvotePost(postId))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Post not found");
   }

@@ -11,6 +11,8 @@ public class UserPostMapper {
     return new UserPostDTO(
         entity.getId(),
         entity.getTitle(),
+        entity.getUpvote(),
+        entity.getDownvote(),
         entity.getDescription(),
         entity.getCreatorId(),
         entity.getCreatedAt(),
@@ -21,6 +23,8 @@ public class UserPostMapper {
     UserPostEntity entity = new UserPostEntity();
     entity.setId(dto.id());
     entity.setTitle(dto.title());
+    entity.setUpvote(dto.upvote());
+    entity.setDownvote(dto.downvote());
     entity.setDescription(dto.description());
     entity.setCreatorId(dto.creatorId());
     entity.setCreatedAt(dto.createdAt());

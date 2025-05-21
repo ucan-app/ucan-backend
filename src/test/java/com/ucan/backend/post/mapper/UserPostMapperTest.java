@@ -17,12 +17,16 @@ class UserPostMapperTest {
     Long id = 1L;
     Long creatorId = 2L;
     String title = "Test Forum";
+    int upvote = 5;
+    int downvote = 1;
     String description = "Test Description";
     LocalDateTime now = LocalDateTime.now();
 
     UserPostEntity entity = new UserPostEntity();
     entity.setId(id);
     entity.setTitle(title);
+    entity.setUpvote(upvote);
+    entity.setDownvote(downvote);
     entity.setDescription(description);
     entity.setCreatorId(creatorId);
     entity.setCreatedAt(now);
@@ -34,6 +38,8 @@ class UserPostMapperTest {
     // Then
     assertThat(dto.id()).isEqualTo(id);
     assertThat(dto.title()).isEqualTo(title);
+    assertThat(dto.upvote()).isEqualTo(upvote);
+    assertThat(dto.downvote()).isEqualTo(downvote);
     assertThat(dto.description()).isEqualTo(description);
     assertThat(dto.creatorId()).isEqualTo(creatorId);
     assertThat(dto.createdAt()).isEqualTo(now);
@@ -46,10 +52,13 @@ class UserPostMapperTest {
     Long id = 1L;
     Long creatorId = 2L;
     String title = "Test Forum";
+    int upvote = 6;
+    int downvote = 2;
     String description = "Test Description";
     LocalDateTime now = LocalDateTime.now();
 
-    UserPostDTO dto = new UserPostDTO(id, title, description, creatorId, now, now);
+    UserPostDTO dto =
+        new UserPostDTO(id, title, upvote, downvote, description, creatorId, now, now);
 
     // When
     UserPostEntity entity = mapper.toEntity(dto);
@@ -57,6 +66,8 @@ class UserPostMapperTest {
     // Then
     assertThat(entity.getId()).isEqualTo(id);
     assertThat(entity.getTitle()).isEqualTo(title);
+    assertThat(entity.getUpvote()).isEqualTo(upvote);
+    assertThat(entity.getDownvote()).isEqualTo(downvote);
     assertThat(entity.getDescription()).isEqualTo(description);
     assertThat(entity.getCreatorId()).isEqualTo(creatorId);
     assertThat(entity.getCreatedAt()).isEqualTo(now);
