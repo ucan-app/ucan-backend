@@ -21,5 +21,6 @@ public interface UserPostAPI {
 
   // upvotePost and downvotePost to the public API interface for modular access
   void upvotePost(Long postId);
+
   void downvotePost(Long postId);
 }
