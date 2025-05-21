@@ -61,10 +61,8 @@ tasks.withType<Test> {
 }
 
 tasks.named<Test>("test") {
-    // forward the current shell’s environment variables
     environment("AWS_ACCESS_KEY_ID", System.getenv("AWS_ACCESS_KEY_ID"))
     environment("AWS_SECRET_ACCESS_KEY", System.getenv("AWS_SECRET_ACCESS_KEY"))
-    // optional: region and bucket
     environment("AWS_REGION", System.getenv("AWS_REGION"))
     environment("AWS_S3_BUCKET", System.getenv("AWS_S3_BUCKET"))
 }
