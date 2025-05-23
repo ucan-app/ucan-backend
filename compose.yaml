@@ -1,17 +1,12 @@
 services:
   postgres:
     image: 'postgres:latest'
-    container_name: "${POSTGRES_CONTAINER_NAME:-ucan_app_postgres}"
     environment:
-      - 'POSTGRES_DB=${POSTGRES_DB:-mydatabase}'
-      - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret}'
-      - 'POSTGRES_USER=${POSTGRES_USER:-myuser}'
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
     ports:
-      - "${POSTGRES_HOST_PORT:-5432}:5432"
-    volumes:
-      - "postgres_data:/var/lib/postgresql/data"
-    networks:
-      - app-network
+      - '5432'
 
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME:-ucan_app_localstack}"
