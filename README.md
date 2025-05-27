@@ -6,6 +6,8 @@
 - Run `./gradlew bootRun`
 - Start making requests to `localhost:8080`
 
+Please refer to the [backend developer guidelines](https://github.com/ucan-app/ucan-backend/blob/main/backend-developer-guidelines.md) for more details.
+
 ### Technology Needed
 - Your favorite Java code editor, [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) or [VSCode](https://code.visualstudio.com/download) are recommended.
 - [Docker Desktop](https://docs.docker.com/get-started/introduction/get-docker-desktop/) for local development
