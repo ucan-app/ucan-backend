@@ -16,7 +16,7 @@ public class CorsConfig {
         registry
             .addMapping("/**") // Apply to all endpoints
             .allowedOrigins("http://localhost:3000") // Allow requests from the frontend
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow these HTTP methods
+            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // Allow these HTTP methods
             .allowedHeaders("*") // Allow all headers
             .allowCredentials(true); // Allow cookies/sessions
       }

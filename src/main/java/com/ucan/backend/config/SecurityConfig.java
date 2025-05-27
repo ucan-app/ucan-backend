@@ -59,7 +59,11 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             request ->
-                request.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
+                request.requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/posts/**").permitAll()
+                .requestMatchers("/posts/*/comments").permitAll()
+                .requestMatchers("/comments/*/replies").permitAll()
+                .requestMatchers("/profile/*").permitAll().anyRequest().authenticated())
         .formLogin(form -> form.disable())
         .logout(logout -> logout.permitAll())
         .csrf((csrf) -> csrf.disable())
