@@ -92,18 +92,50 @@ public class UserPostService implements UserPostAPI {
   }
 
   @Transactional
-  public void upvotePost(Long postId) {
+  public void upvotePost(Long postId, Long userId) {
     UserPostEntity post =
         postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
-    post.setUpvote(post.getUpvote() + 1);
+
+    Boolean previousVote = post.getUserVotes().get(userId);
+    // to undo the vote
+    if (Boolean.TRUE.equals(previousVote)) {
+      post.setUpvote(post.getUpvote() - 1);
+      post.getUserVotes().remove(userId);
+    } else {
+      // switching from downvote to upvote
+      if (Boolean.FALSE.equals(previousVote)) {
+        post.setDownvote(post.getDownvote() - 1);
+        post.setUpvote(post.getUpvote() + 1);
+      } else {
+        // for the new upvote
+        post.setUpvote(post.getUpvote() + 1);
+      }
+      post.getUserVotes().put(userId, true);
+    }
     postRepository.save(post);
   }
 
   @Transactional
-  public void downvotePost(Long postId) {
+  public void downvotePost(Long postId, Long userId) {
     UserPostEntity post =
         postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
-    post.setDownvote(post.getDownvote() + 1);
+
+    Boolean previousVote = post.getUserVotes().get(userId);
+    // to undo the vote
+    if (Boolean.FALSE.equals(previousVote)) {
+      post.setDownvote(post.getDownvote() - 1);
+      post.getUserVotes().remove(userId);
+    } else {
+      // tp switch from upvote to downvote
+      if (Boolean.TRUE.equals(previousVote)) {
+        post.setUpvote(post.getUpvote() - 1);
+        post.setDownvote(post.getDownvote() + 1);
+      } else {
+        // for the new downvote
+        post.setDownvote(post.getDownvote() + 1);
+      }
+      post.getUserVotes().put(userId, false);
+    }
     postRepository.save(post);
   }
 }

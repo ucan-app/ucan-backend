@@ -174,59 +174,138 @@ class UserPostServiceTest {
         .hasMessage("Post not found");
   }
 
-  @Test
-  void upvotePost_ShouldIncrementUpvote() {
-    // Given
-    Long postId = 1L;
-    UserPostEntity post = new UserPostEntity();
-    post.setUpvote(2);
-    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-
-    // When
-    postService.upvotePost(postId);
-
-    // Then
-    assertThat(post.getUpvote()).isEqualTo(3);
-    verify(postRepository).save(post);
-  }
-
-  @Test
-  void downvotePost_ShouldIncrementDownvote() {
-    // Given
-    Long postId = 2L;
-    UserPostEntity post = new UserPostEntity();
-    post.setDownvote(4);
-    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-
-    // When
-    postService.downvotePost(postId);
-
-    // Then
-    assertThat(post.getDownvote()).isEqualTo(5);
-    verify(postRepository).save(post);
-  }
-
+  // makes sure that trying to upvote a non-existent post throws an exception
   @Test
   void upvotePost_WhenPostNotFound_ShouldThrowException() {
-    // Given
     Long postId = 99L;
+    Long userId = 10L;
     when(postRepository.findById(postId)).thenReturn(Optional.empty());
 
-    // Then
-    assertThatThrownBy(() -> postService.upvotePost(postId))
+    assertThatThrownBy(() -> postService.upvotePost(postId, userId))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Post not found");
   }
 
+  // makes sure that trying to downvote a non-existent post throws an exception
   @Test
   void downvotePost_WhenPostNotFound_ShouldThrowException() {
-    // Given
     Long postId = 100L;
+    Long userId = 11L;
     when(postRepository.findById(postId)).thenReturn(Optional.empty());
 
-    // Then
-    assertThatThrownBy(() -> postService.downvotePost(postId))
+    assertThatThrownBy(() -> postService.downvotePost(postId, userId))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Post not found");
+  }
+
+  // Tests adding a new upvote from a user who has not voted before
+  @Test
+  void upvotePost_WhenNewVote_ShouldAddUpvote() {
+    Long postId = 1L;
+    Long userId = 42L;
+    UserPostEntity post = new UserPostEntity();
+    post.setUpvote(0);
+
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    postService.upvotePost(postId, userId);
+
+    assertThat(post.getUpvote()).isEqualTo(1);
+    assertThat(post.getUserVotes()).containsEntry(userId, true);
+    verify(postRepository).save(post);
+  }
+
+  // Tests that an existing upvote by the same user is removed
+  @Test
+  void upvotePost_WhenAlreadyUpvoted_ShouldRemoveVote() {
+    Long postId = 1L;
+    Long userId = 42L;
+    UserPostEntity post = new UserPostEntity();
+    post.setUpvote(1);
+    post.getUserVotes().put(userId, true);
+
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    postService.upvotePost(postId, userId);
+
+    assertThat(post.getUpvote()).isEqualTo(0);
+    assertThat(post.getUserVotes()).doesNotContainKey(userId);
+    verify(postRepository).save(post);
+  }
+
+  // Tests switching a downvote to an upvote by the same user
+  @Test
+  void upvotePost_WhenPreviouslyDownvoted_ShouldSwitchToUpvote() {
+    Long postId = 1L;
+    Long userId = 42L;
+    UserPostEntity post = new UserPostEntity();
+    post.setUpvote(0);
+    post.setDownvote(1);
+    post.getUserVotes().put(userId, false);
+
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    postService.upvotePost(postId, userId);
+
+    assertThat(post.getUpvote()).isEqualTo(1);
+    assertThat(post.getDownvote()).isEqualTo(0);
+    assertThat(post.getUserVotes()).containsEntry(userId, true);
+    verify(postRepository).save(post);
+  }
+
+  // Tests adding a new downvote from a user who has not voted before
+  @Test
+  void downvotePost_WhenNewVote_ShouldAddDownvote() {
+    Long postId = 2L;
+    Long userId = 55L;
+    UserPostEntity post = new UserPostEntity();
+    post.setDownvote(0);
+
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    postService.downvotePost(postId, userId);
+
+    assertThat(post.getDownvote()).isEqualTo(1);
+    assertThat(post.getUserVotes()).containsEntry(userId, false);
+    verify(postRepository).save(post);
+  }
+
+  // Tests that an existing downvote by the same user is removed
+  @Test
+  void downvotePost_WhenAlreadyDownvoted_ShouldRemoveVote() {
+    // Tests that an existing downvote by the same user is removed (toggling behavior)
+    Long postId = 2L;
+    Long userId = 55L;
+    UserPostEntity post = new UserPostEntity();
+    post.setDownvote(1);
+    post.getUserVotes().put(userId, false);
+
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    postService.downvotePost(postId, userId);
+
+    assertThat(post.getDownvote()).isEqualTo(0);
+    assertThat(post.getUserVotes()).doesNotContainKey(userId);
+    verify(postRepository).save(post);
+  }
+
+  // Tests switching an upvote to a downvote by the same user
+  @Test
+  void downvotePost_WhenPreviouslyUpvoted_ShouldSwitchToDownvote() {
+    Long postId = 2L;
+    Long userId = 55L;
+    UserPostEntity post = new UserPostEntity();
+    post.setUpvote(1);
+    post.setDownvote(0);
+    post.getUserVotes().put(userId, true);
+
+    when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    postService.downvotePost(postId, userId);
+
+    assertThat(post.getDownvote()).isEqualTo(1);
+    assertThat(post.getUpvote()).isEqualTo(0);
+    assertThat(post.getUserVotes()).containsEntry(userId, false);
+    verify(postRepository).save(post);
   }
 }
