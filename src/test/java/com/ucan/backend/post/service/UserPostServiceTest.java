@@ -46,6 +46,7 @@ class UserPostServiceTest {
     String description = "Test Description";
     Long creatorId = 1L;
     Long postId = 1L;
+    String imageURL = "http://example.com/image.jpg";
     LocalDateTime now = LocalDateTime.now();
 
     UserPostEntity entity = new UserPostEntity();
@@ -59,7 +60,8 @@ class UserPostServiceTest {
     entity.setUpdatedAt(now);
 
     UserPostDTO dto =
-        new UserPostDTO(postId, title, upvote, downvote, description, creatorId, now, now);
+        new UserPostDTO(
+            postId, title, upvote, downvote, description, creatorId, imageURL, now, now);
 
     when(postRepository.save(any(UserPostEntity.class))).thenReturn(entity);
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -82,7 +84,16 @@ class UserPostServiceTest {
     Long postId = 1L;
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
-        new UserPostDTO(postId, "Test", 6, 2, "Desc", 2L, LocalDateTime.now(), LocalDateTime.now());
+        new UserPostDTO(
+            postId,
+            "Test",
+            6,
+            2,
+            "Desc",
+            2L,
+            "http://example.com/image.jpg",
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
     when(postRepository.findById(postId)).thenReturn(Optional.of(entity));
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -113,7 +124,15 @@ class UserPostServiceTest {
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
         new UserPostDTO(
-            2L, "Test", 6, 2, "Desc", creatorId, LocalDateTime.now(), LocalDateTime.now());
+            2L,
+            "Test",
+            6,
+            2,
+            "Desc",
+            creatorId,
+            "http://example.com/image.jpg",
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
     when(postRepository.findByCreatorId(creatorId)).thenReturn(List.of(entity));
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -147,7 +166,15 @@ class UserPostServiceTest {
     UserPostEntity entity = new UserPostEntity();
     UserPostDTO dto =
         new UserPostDTO(
-            postId, newTitle, 6, 2, newDescription, 2L, LocalDateTime.now(), LocalDateTime.now());
+            postId,
+            newTitle,
+            6,
+            2,
+            newDescription,
+            2L,
+            "http://example.com/image.jpg",
+            LocalDateTime.now(),
+            LocalDateTime.now());
 
     when(postRepository.findById(postId)).thenReturn(Optional.of(entity));
     when(postRepository.save(entity)).thenReturn(entity);

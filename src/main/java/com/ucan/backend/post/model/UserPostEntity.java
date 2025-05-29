@@ -39,6 +39,9 @@ public class UserPostEntity {
   @Column(name = "creator_id", nullable = false)
   private Long creatorId;
 
+  @Column(name = "image_url")
+  private String imageUrl;
+
   @Column(name = "is_moderated", nullable = false)
   private boolean isModerated;
 

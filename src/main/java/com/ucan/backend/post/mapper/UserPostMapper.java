@@ -15,6 +15,7 @@ public class UserPostMapper {
         entity.getDownvote(),
         entity.getDescription(),
         entity.getCreatorId(),
+        entity.getImageUrl(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -27,6 +28,7 @@ public class UserPostMapper {
     entity.setDownvote(dto.downvote());
     entity.setDescription(dto.description());
     entity.setCreatorId(dto.creatorId());
+    entity.setImageUrl(dto.imageUrl());
     entity.setCreatedAt(dto.createdAt());
     entity.setUpdatedAt(dto.updatedAt());
     return entity;

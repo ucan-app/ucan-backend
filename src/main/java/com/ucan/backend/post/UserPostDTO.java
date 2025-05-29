@@ -9,5 +9,6 @@ public record UserPostDTO(
     int downvote,
     String description,
     Long creatorId,
+    String imageUrl,
     LocalDateTime createdAt,
     LocalDateTime updatedAt) {}

@@ -14,6 +14,8 @@ public interface UserPostAPI {
 
   UserPostDTO updatePost(Long postId, String title, String description);
 
+  UserPostDTO updatePostImage(Long postId, String imageUrl);
+
   Page<UserPostDTO> getAllPosts(int page, int size);
 
   // TODO: Implement these methods when post functionality is added
