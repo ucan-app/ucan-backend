@@ -2,17 +2,21 @@ package com.ucan.backend.gateway.controller;
 
 import com.ucan.backend.post.UserPostAPI;
 import com.ucan.backend.post.UserPostDTO;
+import com.ucan.backend.post.service.PostImageService;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class UserPostController {
   private final UserPostAPI postService;
+  private final PostImageService postImageService;
 
   @GetMapping
   public ResponseEntity<Page<UserPostDTO>> getAllPosts(
@@ -22,8 +26,34 @@ public class UserPostController {
 
   @PostMapping
   public ResponseEntity<UserPostDTO> createPost(
-      @RequestParam String title, @RequestParam String description, @RequestParam Long creatorId) {
-    return ResponseEntity.ok(postService.createPost(title, description, creatorId));
+      @RequestParam String title,
+      @RequestParam String description,
+      @RequestParam Long creatorId,
+      @RequestParam(required = false) MultipartFile image) {
+    UserPostDTO post = postService.createPost(title, description, creatorId);
+
+    if (image != null && !image.isEmpty()) {
+      try {
+        String imageUrl = postImageService.uploadPostImage(image, post.id());
+        post = postService.updatePostImage(post.id(), imageUrl);
+      } catch (IOException e) {
+        return ResponseEntity.badRequest().build();
+      }
+    }
+
+    return ResponseEntity.ok(post);
+  }
+
+  @PostMapping("/{postId}/image")
+  public ResponseEntity<UserPostDTO> uploadPostImage(
+      @PathVariable Long postId, @RequestParam("file") MultipartFile file) {
+    try {
+      String imageUrl = postImageService.uploadPostImage(file, postId);
+      UserPostDTO updatedPost = postService.updatePostImage(postId, imageUrl);
+      return ResponseEntity.ok(updatedPost);
+    } catch (IOException e) {
+      return ResponseEntity.badRequest().build();
+    }
   }
 
   @GetMapping("/{postId}")

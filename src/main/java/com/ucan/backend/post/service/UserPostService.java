@@ -46,6 +46,15 @@ public class UserPostService implements UserPostAPI {
   }
 
   @Override
+  @Transactional
+  public UserPostDTO updatePostImage(Long postId, String imageUrl) {
+    UserPostEntity post =
+        postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+    post.setImageUrl(imageUrl);
+    return postMapper.toDTO(postRepository.save(post));
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public UserPostDTO getPost(Long postId) {
     return postRepository
