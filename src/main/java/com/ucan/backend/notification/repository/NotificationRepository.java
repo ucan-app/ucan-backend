@@ -8,4 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
   List<NotificationEntity> findByRecipientIdOrderByCreatedAtDesc(Long recipientId);
+
+  List<NotificationEntity> findByRecipientIdAndReadAtIsNull(Long recipientId);
+
+  long countByRecipientIdAndReadAtIsNull(Long recipientId);
 }

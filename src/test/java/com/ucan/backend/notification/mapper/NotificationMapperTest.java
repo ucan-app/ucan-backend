@@ -28,4 +28,17 @@ class NotificationMapperTest {
     assertThat(dto.read()).isFalse();
     assertThat(dto.createdAt()).isNotNull();
   }
+
+  @Test
+  void toEntity_ShouldMapAllFields() {
+    NotificationDTO dto = new NotificationDTO(2L, 20L, "Builder Test", true, LocalDateTime.now());
+
+    NotificationEntity entity = mapper.toEntity(dto);
+
+    assertThat(entity.getId()).isEqualTo(2L);
+    assertThat(entity.getRecipientId()).isEqualTo(20L);
+    assertThat(entity.getMessage()).isEqualTo("Builder Test");
+    assertThat(entity.isRead()).isTrue();
+    assertThat(entity.getCreatedAt()).isNull();
+  }
 }

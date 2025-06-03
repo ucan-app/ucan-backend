@@ -58,4 +58,42 @@ class NotificationServiceTest {
     assertThat(entity.isRead()).isTrue();
     verify(repository).save(entity);
   }
+
+  @Test
+  void markAllAsRead_ShouldUpdateReadAtForAllUnread() {
+    NotificationEntity n1 = new NotificationEntity();
+    NotificationEntity n2 = new NotificationEntity();
+
+    when(repository.findByRecipientIdAndReadAtIsNull(10L)).thenReturn(List.of(n1, n2));
+
+    service.markAllAsRead(10L);
+
+    assertThat(n1.getReadAt()).isNotNull();
+    assertThat(n2.getReadAt()).isNotNull();
+    verify(repository).saveAll(List.of(n1, n2));
+  }
+
+  @Test
+  void countUnreadNotifications_ShouldReturnCorrectCount() {
+    when(repository.countByRecipientIdAndReadAtIsNull(10L)).thenReturn(3L);
+
+    long result = service.countUnreadNotifications(10L);
+
+    assertThat(result).isEqualTo(3L);
+  }
+
+  @Test
+  void getNotificationsAndMarkAsRead_ShouldMarkAndReturnNotifications() {
+    NotificationEntity entity = new NotificationEntity();
+    NotificationDTO dto = new NotificationDTO(1L, 10L, "Test", false, null);
+
+    when(repository.findByRecipientIdAndReadAtIsNull(10L)).thenReturn(List.of(entity));
+    when(repository.findByRecipientIdOrderByCreatedAtDesc(10L)).thenReturn(List.of(entity));
+    when(mapper.toDTO(entity)).thenReturn(dto);
+
+    List<NotificationDTO> result = service.getNotificationsAndMarkAsRead(10L);
+
+    assertThat(result).hasSize(1);
+    verify(repository).saveAll(anyList());
+  }
 }

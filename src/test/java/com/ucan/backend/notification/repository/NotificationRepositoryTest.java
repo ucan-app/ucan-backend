@@ -58,4 +58,52 @@ class NotificationRepositoryTest {
     assertThat(results.get(0).getMessage()).isEqualTo("New Notification");
     assertThat(results.get(1).getMessage()).isEqualTo("Old Notification");
   }
+
+  @Test
+  void shouldReturnOnlyUnreadNotifications() {
+    Long userId = 2L;
+
+    NotificationEntity read = new NotificationEntity();
+    read.setRecipientId(userId);
+    read.setMessage("Read Notification");
+    read.setReadAt(LocalDateTime.now());
+    repository.save(read);
+
+    NotificationEntity unread = new NotificationEntity();
+    unread.setRecipientId(userId);
+    unread.setMessage("Unread Notification");
+    unread.setReadAt(null);
+    repository.save(unread);
+
+    List<NotificationEntity> unreadResults = repository.findByRecipientIdAndReadAtIsNull(userId);
+
+    assertThat(unreadResults).hasSize(1);
+    assertThat(unreadResults.get(0).getMessage()).isEqualTo("Unread Notification");
+  }
+
+  @Test
+  void shouldCountOnlyUnreadNotifications() {
+    Long userId = 3L;
+
+    NotificationEntity n1 = new NotificationEntity();
+    n1.setRecipientId(userId);
+    n1.setMessage("Unread 1");
+    n1.setReadAt(null);
+    repository.save(n1);
+
+    NotificationEntity n2 = new NotificationEntity();
+    n2.setRecipientId(userId);
+    n2.setMessage("Unread 2");
+    n2.setReadAt(null);
+    repository.save(n2);
+
+    NotificationEntity read = new NotificationEntity();
+    read.setRecipientId(userId);
+    read.setMessage("Read");
+    read.setReadAt(LocalDateTime.now());
+    repository.save(read);
+
+    long count = repository.countByRecipientIdAndReadAtIsNull(userId);
+    assertThat(count).isEqualTo(2);
+  }
 }

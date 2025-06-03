@@ -14,9 +14,15 @@ public class NotificationController {
 
   private final NotificationAPI notificationAPI;
 
-  @GetMapping("/{userId}")
-  public ResponseEntity<List<NotificationDTO>> getNotifications(@PathVariable Long userId) {
-    return ResponseEntity.ok(notificationAPI.getNotifications(userId));
+  @GetMapping
+  public ResponseEntity<List<NotificationDTO>> getNotifications(
+      @RequestParam("userId") Long userId) {
+    return ResponseEntity.ok(notificationAPI.getNotificationsAndMarkAsRead(userId));
+  }
+
+  @GetMapping("/unread-count")
+  public ResponseEntity<Long> getUnreadCount(@RequestParam("userId") Long userId) {
+    return ResponseEntity.ok(notificationAPI.getUnreadCount(userId));
   }
 
   @PostMapping("/{notificationId}/read")

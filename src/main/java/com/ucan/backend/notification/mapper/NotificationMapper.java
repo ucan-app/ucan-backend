@@ -17,12 +17,11 @@ public class NotificationMapper {
   }
 
   public NotificationEntity toEntity(NotificationDTO dto) {
-    NotificationEntity entity = new NotificationEntity();
-    entity.setId(dto.id());
-    entity.setRecipientId(dto.recipientId());
-    entity.setMessage(dto.message());
-    entity.setRead(dto.read());
-    // since createdAt is auto-generated, we don't manually set it
-    return entity;
+    return NotificationEntity.builder()
+        .id(dto.id())
+        .recipientId(dto.recipientId())
+        .message(dto.message())
+        .read(dto.read())
+        .build();
   }
 }

@@ -5,6 +5,7 @@ import com.ucan.backend.notification.NotificationDTO;
 import com.ucan.backend.notification.mapper.NotificationMapper;
 import com.ucan.backend.notification.model.NotificationEntity;
 import com.ucan.backend.notification.repository.NotificationRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,8 @@ public class NotificationService implements NotificationAPI {
   }
 
   public void sendNotification(Long recipientId, String message) {
-    NotificationEntity notification = new NotificationEntity();
-    notification.setRecipientId(recipientId);
-    notification.setMessage(message);
+    NotificationEntity notification =
+        NotificationEntity.builder().recipientId(recipientId).message(message).build();
     repository.save(notification);
   }
 
@@ -40,5 +40,33 @@ public class NotificationService implements NotificationAPI {
               n.setRead(true);
               repository.save(n);
             });
+  }
+
+  public void markAllAsRead(Long userId) {
+    List<NotificationEntity> unreadNotifications =
+        repository.findByRecipientIdAndReadAtIsNull(userId);
+    if (unreadNotifications.isEmpty()) return;
+
+    for (NotificationEntity notification : unreadNotifications) {
+      notification.setReadAt(LocalDateTime.now());
+    }
+    repository.saveAll(unreadNotifications);
+  }
+
+  public long countUnreadNotifications(Long userId) {
+    return repository.countByRecipientIdAndReadAtIsNull(userId);
+  }
+
+  @Override
+  public List<NotificationDTO> getNotificationsAndMarkAsRead(Long userId) {
+    markAllAsRead(userId);
+    return repository.findByRecipientIdOrderByCreatedAtDesc(userId).stream()
+        .map(mapper::toDTO)
+        .toList();
+  }
+
+  @Override
+  public long getUnreadCount(Long userId) {
+    return countUnreadNotifications(userId);
   }
 }

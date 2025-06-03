@@ -24,14 +24,15 @@ class NotificationControllerTest {
   }
 
   @Test
-  void getNotifications_ShouldReturnList() {
+  void getNotifications_ShouldReturnListAndMarkAllAsRead() {
     NotificationDTO dto = new NotificationDTO(1L, 10L, "Test Message", false, LocalDateTime.now());
-    when(notificationAPI.getNotifications(10L)).thenReturn(List.of(dto));
+    when(notificationAPI.getNotificationsAndMarkAsRead(10L)).thenReturn(List.of(dto));
 
     ResponseEntity<List<NotificationDTO>> response = notificationController.getNotifications(10L);
 
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
     assertThat(response.getBody()).containsExactly(dto);
+    verify(notificationAPI).getNotificationsAndMarkAsRead(10L);
   }
 
   @Test
@@ -39,5 +40,16 @@ class NotificationControllerTest {
     ResponseEntity<Void> response = notificationController.markAsRead(1L);
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
     verify(notificationAPI).markAsRead(1L);
+  }
+
+  @Test
+  void getUnreadCount_ShouldReturnCount() {
+    when(notificationAPI.getUnreadCount(10L)).thenReturn(2L);
+
+    ResponseEntity<Long> response = notificationController.getUnreadCount(10L);
+
+    assertThat(response.getStatusCodeValue()).isEqualTo(200);
+    assertThat(response.getBody()).isEqualTo(2L);
+    verify(notificationAPI).getUnreadCount(10L);
   }
 }

@@ -2,10 +2,16 @@ package com.ucan.backend.notification.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "notifications")
 @Getter
@@ -27,4 +33,7 @@ public class NotificationEntity {
   @CreationTimestamp
   @Column(updatable = false)
   private LocalDateTime createdAt;
+
+  @Column(name = "read_at")
+  private LocalDateTime readAt;
 }
