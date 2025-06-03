@@ -55,10 +55,11 @@ class UserPostMapperTest {
     int upvote = 6;
     int downvote = 2;
     String description = "Test Description";
+    String imageURL = "http://example.com/image.jpg";
     LocalDateTime now = LocalDateTime.now();
 
     UserPostDTO dto =
-        new UserPostDTO(id, title, upvote, downvote, description, creatorId, now, now);
+        new UserPostDTO(id, title, upvote, downvote, description, creatorId, imageURL, now, now);
 
     // When
     UserPostEntity entity = mapper.toEntity(dto);
