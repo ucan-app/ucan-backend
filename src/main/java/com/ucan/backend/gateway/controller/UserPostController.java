@@ -20,7 +20,7 @@ public class UserPostController {
 
   @GetMapping
   public ResponseEntity<Page<UserPostDTO>> getAllPosts(
-      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "1000") int size) {
     return ResponseEntity.ok(postService.getAllPosts(page, size));
   }
 
