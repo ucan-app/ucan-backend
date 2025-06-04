@@ -38,3 +38,7 @@ out/
 .DS_Store
 .env
 application-local.properties
+
+### AWS Deployment ###
+eb-deploy/
+application-prod.properties

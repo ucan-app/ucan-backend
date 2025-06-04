@@ -15,7 +15,7 @@ public class CorsConfig {
       public void addCorsMappings(CorsRegistry registry) {
         registry
             .addMapping("/**") // Apply to all endpoints
-            .allowedOrigins("http://localhost:3000") // Allow requests from the frontend
+            .allowedOrigins("http://localhost:3000", "http://ucan-app-frontend.s3-website-us-west-2.amazonaws.com/") // Allow requests from the frontend
             .allowedMethods(
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // Allow these HTTP methods
             .allowedHeaders("*") // Allow all headers
