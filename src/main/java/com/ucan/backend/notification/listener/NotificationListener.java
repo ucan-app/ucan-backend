@@ -3,7 +3,7 @@ package com.ucan.backend.notification.listener;
 import com.ucan.backend.notification.service.NotificationService;
 import com.ucan.backend.post.NewCommentCreated;
 import com.ucan.backend.post.NewReplyCreated;
-import org.springframework.context.event.EventListener;
+import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,13 +15,13 @@ public class NotificationListener {
     this.notificationService = notificationService;
   }
 
-  @EventListener
+  @ApplicationModuleListener
   public void handleNewComment(NewCommentCreated event) {
     String message = "Someone commented on your post: " + event.postTitle();
     notificationService.sendNotification(event.postAuthorId(), message);
   }
 
-  @EventListener
+  @ApplicationModuleListener
   public void handleNewReply(NewReplyCreated event) {
     String message = "Someone replied to your comment: " + summarize(event.replyContent());
     notificationService.sendNotification(event.commentAuthorId(), message);
