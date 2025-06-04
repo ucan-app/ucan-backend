@@ -65,7 +65,8 @@ public class UserAuthController {
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       return ResponseEntity.ok(userDetails.getUserId());
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(new ErrorResponse("Invalid username or password, or email not verified"));
+      return ResponseEntity.badRequest()
+          .body(new ErrorResponse("Invalid username or password, or email not verified"));
     }
   }
 
