@@ -27,4 +27,9 @@ public interface UserAuthRepository extends JpaRepository<UserAuthEntity, Long> 
       "SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM BadgeEntity b WHERE b.id.userId = :userId AND b.id.organizationName = :organizationName")
   boolean existsBadgeByUserIdAndOrganization(
       @Param("userId") Long userId, @Param("organizationName") String organizationName);
+
+  @Query(
+      "SELECT b FROM BadgeEntity b WHERE b.id.organizationName = :organizationName AND b.validated = false")
+  Optional<BadgeEntity> findBadgeByOrganizationName(
+      @Param("organizationName") String organizationName);
 }

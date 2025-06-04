@@ -6,6 +6,7 @@ import com.ucan.backend.userauth.model.BadgeEntity;
 import com.ucan.backend.userauth.model.BadgeId;
 import com.ucan.backend.userauth.model.UserAuthEntity;
 import com.ucan.backend.userauth.repository.UserAuthRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +23,8 @@ public class UserAuthService implements UserAuthAPI {
   private final UserAuthMapper userAuthMapper;
   private final PasswordEncoder passwordEncoder;
   private final ApplicationEventPublisher eventPublisher;
+  private final EmailService emailService;
+  private final TokenService tokenService;
 
   @Override
   public UserAuthDTO createUser(UserAuthDTO userDTO) {
@@ -34,9 +37,17 @@ public class UserAuthService implements UserAuthAPI {
 
     UserAuthEntity entity = userAuthMapper.toEntity(userDTO);
     entity.setPassword(passwordEncoder.encode(userDTO.password()));
+    entity.setEnabled(false);
 
     UserAuthEntity savedEntity = userAuthRepository.save(entity);
     UserAuthDTO savedDTO = userAuthMapper.toDTO(savedEntity);
+
+    try {
+      String token = tokenService.generateToken(userDTO.email(), "USER");
+      emailService.sendVerificationEmail(userDTO.email(), token, "USER");
+    } catch (MessagingException e) {
+      throw new RuntimeException("Failed to send verification email", e);
+    }
 
     eventPublisher.publishEvent(
         new NewUserCreatedEvent(
@@ -64,12 +75,54 @@ public class UserAuthService implements UserAuthAPI {
                     .userId(userId)
                     .organizationName(badgeDTO.organizationName())
                     .build())
-            .validated(badgeDTO.validated())
+            .validated(false)
             .user(user)
             .build();
 
     user.getBadges().add(badge);
     userAuthRepository.save(user);
+
+    try {
+      String token = tokenService.generateToken(badgeDTO.organizationName(), "BADGE");
+      emailService.sendVerificationEmail(badgeDTO.organizationName(), token, "BADGE");
+    } catch (MessagingException e) {
+      throw new RuntimeException("Failed to send verification email", e);
+    }
+  }
+
+  @Override
+  public void verifyUser(String token) {
+    TokenService.TokenData tokenData = tokenService.validateAndRemoveToken(token);
+    if (tokenData == null || !tokenData.type().equals("USER")) {
+      throw new IllegalArgumentException("Invalid or expired token");
+    }
+
+    UserAuthEntity user =
+        userAuthRepository
+            .findByEmail(tokenData.email())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    user.setEnabled(true);
+    userAuthRepository.save(user);
+  }
+
+  @Override
+  public void verifyBadge(String token) {
+    TokenService.TokenData tokenData = tokenService.validateAndRemoveToken(token);
+    if (tokenData == null || !tokenData.type().equals("BADGE")) {
+      throw new IllegalArgumentException("Invalid or expired token");
+    }
+
+    BadgeEntity badge =
+        userAuthRepository
+            .findBadgeByOrganizationName(tokenData.email())
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "No unverified badge found for this organization"));
+
+    badge.setValidated(true);
+    userAuthRepository.save(badge.getUser());
   }
 
   @Override

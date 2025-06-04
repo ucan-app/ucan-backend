@@ -18,11 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -69,7 +65,7 @@ public class UserAuthController {
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       return ResponseEntity.ok(userDetails.getUserId());
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(new ErrorResponse("Invalid username or password"));
+      return ResponseEntity.badRequest().body(new ErrorResponse("Invalid username or password, or email not verified"));
     }
   }
 
@@ -86,7 +82,7 @@ public class UserAuthController {
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       Long userId = userDetails.getUserId();
 
-      BadgeDTO badgeDTO = new BadgeDTO(request.organizationName().toUpperCase(), false);
+      BadgeDTO badgeDTO = new BadgeDTO(request.organizationName(), false);
       userAuthService.addBadge(userId, badgeDTO);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
@@ -101,8 +97,28 @@ public class UserAuthController {
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       Long userId = userDetails.getUserId();
 
-      BadgeDTO badgeDTO = new BadgeDTO(request.organizationName().toUpperCase(), false);
+      BadgeDTO badgeDTO = new BadgeDTO(request.organizationName(), false);
       userAuthService.removeBadge(userId, badgeDTO);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+    }
+  }
+
+  @GetMapping("/verify/user")
+  public ResponseEntity<?> verifyUser(@RequestParam String token) {
+    try {
+      userAuthService.verifyUser(token);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+    }
+  }
+
+  @GetMapping("/verify/badge")
+  public ResponseEntity<?> verifyBadge(@RequestParam String token) {
+    try {
+      userAuthService.verifyBadge(token);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));

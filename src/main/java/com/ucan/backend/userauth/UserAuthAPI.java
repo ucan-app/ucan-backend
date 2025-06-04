@@ -14,4 +14,8 @@ public interface UserAuthAPI {
   void addBadge(Long userId, BadgeDTO badgeDTO);
 
   void removeBadge(Long userId, BadgeDTO badgeDTO);
+
+  void verifyUser(String token);
+
+  void verifyBadge(String token);
 }
