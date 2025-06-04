@@ -32,13 +32,21 @@ public class UserCommentService implements UserCommentAPI {
     UserCommentDTO savedDto = mapper.toDTO(savedEntity);
 
     String postTitle = getPostTitle(postId);
-    eventPublisher.publishEvent(new NewCommentCreated(postId, postTitle, dto.authorId()));
+    Long postAuthorId = getPostAuthorId(postId);
+    eventPublisher.publishEvent(new NewCommentCreated(postId, postTitle, postAuthorId));
 
     return savedDto;
   }
 
   private String getPostTitle(Long postId) {
     return postRepository.findById(postId).map(post -> post.getTitle()).orElse("Unknown Post");
+  }
+
+  private Long getPostAuthorId(Long postId) {
+    return postRepository
+        .findById(postId)
+        .map(post -> post.getCreatorId())
+        .orElseThrow(() -> new IllegalArgumentException("Post not found"));
   }
 
   @Override

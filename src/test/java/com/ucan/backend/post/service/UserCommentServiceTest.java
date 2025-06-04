@@ -43,25 +43,27 @@ class UserCommentServiceTest {
   void createComment_ShouldCreateAndPublishEvent() {
     // Given
     Long postId = 1L;
-    Long authorId = 42L;
+    Long commentAuthorId = 42L;
+    Long postAuthorId = 100L;
     String content = "Test comment";
     String postTitle = "Test Post";
     Instant now = Instant.now();
 
-    UserCommentDTO dto = new UserCommentDTO(null, postId, authorId, content, 0, now);
+    UserCommentDTO dto = new UserCommentDTO(null, postId, commentAuthorId, content, 0, now);
     UserCommentEntity entity =
         UserCommentEntity.builder()
             .id(1L)
             .postId(postId)
-            .authorId(authorId)
+            .authorId(commentAuthorId)
             .content(content)
             .replyCount(0)
             .createdAt(now)
             .build();
-    UserCommentDTO savedDto = new UserCommentDTO(1L, postId, authorId, content, 0, now);
+    UserCommentDTO savedDto = new UserCommentDTO(1L, postId, commentAuthorId, content, 0, now);
     UserPostEntity post = new UserPostEntity();
     post.setId(postId);
     post.setTitle(postTitle);
+    post.setCreatorId(postAuthorId);
 
     when(mapper.toEntity(dto)).thenReturn(entity);
     when(repository.save(entity)).thenReturn(entity);
@@ -76,45 +78,39 @@ class UserCommentServiceTest {
     NewCommentCreated event = eventCaptor.getValue();
     assertThat(event.postId()).isEqualTo(postId);
     assertThat(event.postTitle()).isEqualTo(postTitle);
-    assertThat(event.postAuthorId()).isEqualTo(authorId);
+    assertThat(event.postAuthorId()).isEqualTo(postAuthorId);
     assertThat(result).isEqualTo(savedDto);
   }
 
   @Test
-  void createComment_ShouldUseUnknownPostTitle_WhenPostNotFound() {
+  void createComment_ShouldThrow_WhenPostNotFound() {
     // Given
     Long postId = 1L;
-    Long authorId = 42L;
+    Long commentAuthorId = 42L;
     String content = "Test comment";
     Instant now = Instant.now();
 
-    UserCommentDTO dto = new UserCommentDTO(null, postId, authorId, content, 0, now);
+    UserCommentDTO dto = new UserCommentDTO(null, postId, commentAuthorId, content, 0, now);
     UserCommentEntity entity =
         UserCommentEntity.builder()
             .id(1L)
             .postId(postId)
-            .authorId(authorId)
+            .authorId(commentAuthorId)
             .content(content)
             .replyCount(0)
             .createdAt(now)
             .build();
-    UserCommentDTO savedDto = new UserCommentDTO(1L, postId, authorId, content, 0, now);
+    UserCommentDTO savedDto = new UserCommentDTO(1L, postId, commentAuthorId, content, 0, now);
 
     when(mapper.toEntity(dto)).thenReturn(entity);
     when(repository.save(entity)).thenReturn(entity);
     when(mapper.toDTO(entity)).thenReturn(savedDto);
     when(postRepository.findById(postId)).thenReturn(Optional.empty());
 
-    // When
-    UserCommentDTO result = service.createComment(postId, dto);
-
-    // Then
-    verify(eventPublisher).publishEvent(eventCaptor.capture());
-    NewCommentCreated event = eventCaptor.getValue();
-    assertThat(event.postId()).isEqualTo(postId);
-    assertThat(event.postTitle()).isEqualTo("Unknown Post");
-    assertThat(event.postAuthorId()).isEqualTo(authorId);
-    assertThat(result).isEqualTo(savedDto);
+    // When/Then
+    assertThatThrownBy(() -> service.createComment(postId, dto))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Post not found");
   }
 
   @Test
