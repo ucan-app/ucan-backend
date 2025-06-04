@@ -60,6 +60,8 @@ public class SecurityConfig {
     http.authorizeHttpRequests(
             request ->
                 request
+                    .requestMatchers("/api/auth/badge")
+                    .authenticated()
                     .requestMatchers("/api/auth/**")
                     .permitAll()
                     .requestMatchers("/api/posts/**")

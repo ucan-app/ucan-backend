@@ -43,6 +43,7 @@ public class UserProfileController {
             profileDTO.personalWebsite(),
             profileDTO.bio(),
             profileDTO.graduationYear(),
+            authDTO.enabled(),
             authDTO.badges());
     return ResponseEntity.ok(profileResponse);
   }

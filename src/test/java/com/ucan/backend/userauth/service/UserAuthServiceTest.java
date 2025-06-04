@@ -2,10 +2,10 @@ package com.ucan.backend.userauth.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.ucan.backend.userauth.BadgeDTO;
-import com.ucan.backend.userauth.NewUserCreatedEvent;
 import com.ucan.backend.userauth.UserAuthDTO;
 import com.ucan.backend.userauth.mapper.UserAuthMapper;
 import com.ucan.backend.userauth.model.BadgeEntity;
@@ -37,6 +37,10 @@ class UserAuthServiceTest {
 
   @Mock private ApplicationEventPublisher eventPublisher;
 
+  @Mock private EmailService emailService;
+
+  @Mock private TokenService tokenService;
+
   @InjectMocks private UserAuthService userAuthService;
 
   private UserAuthDTO testUserDTO;
@@ -46,7 +50,8 @@ class UserAuthServiceTest {
   @BeforeEach
   void setUp() {
     testUserDTO =
-        new UserAuthDTO(1L, "testuser", "test@example.com", "password123", true, new ArrayList<>());
+        new UserAuthDTO(
+            1L, "testuser", "test@example.com", "password123", false, new ArrayList<>());
 
     testUserEntity =
         UserAuthEntity.builder()
@@ -54,7 +59,7 @@ class UserAuthServiceTest {
             .username("testuser")
             .email("test@example.com")
             .password("encodedPassword")
-            .enabled(true)
+            .enabled(false)
             .createdAt(Instant.now())
             .build();
 
@@ -62,13 +67,17 @@ class UserAuthServiceTest {
   }
 
   @Test
-  void createUser_Success() {
+  void createUser_Success() throws Exception {
     when(userAuthRepository.existsByUsername(testUserDTO.username())).thenReturn(false);
     when(userAuthRepository.existsByEmail(testUserDTO.email())).thenReturn(false);
     when(userAuthMapper.toEntity(testUserDTO)).thenReturn(testUserEntity);
     when(passwordEncoder.encode(testUserDTO.password())).thenReturn("encodedPassword");
     when(userAuthRepository.save(any(UserAuthEntity.class))).thenReturn(testUserEntity);
     when(userAuthMapper.toDTO(testUserEntity)).thenReturn(testUserDTO);
+    when(tokenService.generateToken(eq(testUserDTO.email()), eq("USER"))).thenReturn("test-token");
+    doNothing()
+        .when(emailService)
+        .sendVerificationEmail(eq(testUserDTO.email()), eq("test-token"), eq("USER"));
 
     UserAuthDTO result = userAuthService.createUser(testUserDTO);
 
@@ -76,19 +85,20 @@ class UserAuthServiceTest {
     assertEquals(testUserDTO.username(), result.username());
     assertEquals(testUserDTO.email(), result.email());
     assertTrue(result.badges().isEmpty());
-    verify(eventPublisher).publishEvent(any(NewUserCreatedEvent.class));
+    assertFalse(result.enabled());
+    verify(tokenService).generateToken(testUserDTO.email(), "USER");
+    verify(emailService).sendVerificationEmail(testUserDTO.email(), "test-token", "USER");
   }
 
   @Test
-  void createUser_WithBadges_Success() {
-    // Arrange
+  void createUser_WithBadges_Success() throws Exception {
     UserAuthDTO dtoWithBadges =
         new UserAuthDTO(
             1L,
             "testuser",
             "test@example.com",
             "password123",
-            true,
+            false,
             List.of(new BadgeDTO("UW", true)));
 
     UserAuthEntity entityWithBadges =
@@ -97,7 +107,7 @@ class UserAuthServiceTest {
             .username("testuser")
             .email("test@example.com")
             .password("encodedPassword")
-            .enabled(true)
+            .enabled(false)
             .createdAt(Instant.now())
             .build();
 
@@ -115,18 +125,23 @@ class UserAuthServiceTest {
     when(passwordEncoder.encode(dtoWithBadges.password())).thenReturn("encodedPassword");
     when(userAuthRepository.save(any(UserAuthEntity.class))).thenReturn(entityWithBadges);
     when(userAuthMapper.toDTO(entityWithBadges)).thenReturn(dtoWithBadges);
+    when(tokenService.generateToken(eq(dtoWithBadges.email()), eq("USER")))
+        .thenReturn("test-token");
+    doNothing()
+        .when(emailService)
+        .sendVerificationEmail(eq(dtoWithBadges.email()), eq("test-token"), eq("USER"));
 
-    // Act
     UserAuthDTO result = userAuthService.createUser(dtoWithBadges);
 
-    // Assert
     assertNotNull(result);
     assertEquals(dtoWithBadges.username(), result.username());
     assertEquals(dtoWithBadges.email(), result.email());
     assertEquals(1, result.badges().size());
     assertEquals("UW", result.badges().get(0).organizationName());
     assertTrue(result.badges().get(0).validated());
-    verify(eventPublisher).publishEvent(any(NewUserCreatedEvent.class));
+    assertFalse(result.enabled());
+    verify(tokenService).generateToken(dtoWithBadges.email(), "USER");
+    verify(emailService).sendVerificationEmail(dtoWithBadges.email(), "test-token", "USER");
   }
 
   @Test
@@ -222,19 +237,24 @@ class UserAuthServiceTest {
   }
 
   @Test
-  void addBadge_Success() {
-    // Arrange
+  void addBadge_Success() throws Exception {
     when(userAuthRepository.findById(1L)).thenReturn(Optional.of(testUserEntity));
     when(userAuthRepository.existsBadgeByUserIdAndOrganization(1L, "UW")).thenReturn(false);
+    when(tokenService.generateToken(eq(testBadgeDTO.organizationName()), eq("BADGE")))
+        .thenReturn("test-token");
+    doNothing()
+        .when(emailService)
+        .sendVerificationEmail(eq(testBadgeDTO.organizationName()), eq("test-token"), eq("BADGE"));
 
-    // Act
     userAuthService.addBadge(1L, testBadgeDTO);
 
-    // Assert
     verify(userAuthRepository).save(testUserEntity);
     assertEquals(1, testUserEntity.getBadges().size());
     assertEquals("UW", testUserEntity.getBadges().get(0).getId().getOrganizationName());
     assertFalse(testUserEntity.getBadges().get(0).isValidated());
+    verify(tokenService).generateToken(testBadgeDTO.organizationName(), "BADGE");
+    verify(emailService)
+        .sendVerificationEmail(testBadgeDTO.organizationName(), "test-token", "BADGE");
   }
 
   @Test

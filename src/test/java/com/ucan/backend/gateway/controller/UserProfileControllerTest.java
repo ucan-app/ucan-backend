@@ -62,6 +62,7 @@ class UserProfileControllerTest {
             profileDTO.personalWebsite(),
             profileDTO.bio(),
             profileDTO.graduationYear(),
+            false,
             authDTO.badges());
   }
 

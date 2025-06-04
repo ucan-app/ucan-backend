@@ -10,4 +10,5 @@ public record ProfileResponse(
     String personalWebsite,
     String bio,
     Integer graduationYear,
+    boolean verified,
     List<BadgeDTO> badges) {}
