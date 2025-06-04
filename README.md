@@ -4,6 +4,7 @@
 - Clone this repository
 - Run Docker Desktop
 - Run `./gradlew bootRun`
+- Create S3 Bucket: `awslocal s3 mb s3://ucan-app`
 - Start making requests to `localhost:8080`
 
 Please refer to the [backend developer guidelines](https://github.com/ucan-app/ucan-backend/blob/main/backend-developer-guidelines.md) for more details.
