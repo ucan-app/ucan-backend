@@ -14,11 +14,11 @@ class NotificationListenerTest {
     NotificationService mockService = mock(NotificationService.class);
     NotificationListener listener = new NotificationListener(mockService);
 
-    NewCommentCreated event = new NewCommentCreated(1L, "Post title", 42L);
+    NewCommentCreated event = new NewCommentCreated(1L, "Post title", 42L, "testuser");
     listener.handleNewComment(event);
 
     verify(mockService)
-        .sendNotification(42L, "Someone commented on your post: Post title", 1L, null);
+        .sendNotification(42L, "testuser commented on your post: Post title", 1L, null);
   }
 
   @Test
@@ -26,11 +26,11 @@ class NotificationListenerTest {
     NotificationService mockService = mock(NotificationService.class);
     NotificationListener listener = new NotificationListener(mockService);
 
-    NewReplyCreated event = new NewReplyCreated(123L, 88L, "This is a reply", 999L);
+    NewReplyCreated event = new NewReplyCreated(123L, 88L, "This is a reply", 999L, "testuser");
     listener.handleNewReply(event);
 
     verify(mockService)
-        .sendNotification(88L, "Someone replied to your comment: This is a reply", 999L, 123L);
+        .sendNotification(88L, "testuser replied to your comment: This is a reply", 999L, 123L);
   }
 
   @Test
@@ -40,13 +40,13 @@ class NotificationListenerTest {
 
     String longReply =
         "This is a very long reply that should be truncated to avoid overflowing the notification.";
-    NewReplyCreated event = new NewReplyCreated(123L, 88L, longReply, 999L);
+    NewReplyCreated event = new NewReplyCreated(123L, 88L, longReply, 999L, "testuser");
     listener.handleNewReply(event);
 
     verify(mockService)
         .sendNotification(
             eq(88L),
-            startsWith("Someone replied to your comment: This is a very long"),
+            startsWith("testuser replied to your comment: This is a very long"),
             eq(999L),
             eq(123L));
   }

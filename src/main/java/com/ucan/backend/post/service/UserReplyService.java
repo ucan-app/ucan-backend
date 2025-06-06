@@ -7,6 +7,7 @@ import com.ucan.backend.post.mapper.UserReplyMapper;
 import com.ucan.backend.post.model.UserReplyEntity;
 import com.ucan.backend.post.repository.UserCommentRepository;
 import com.ucan.backend.post.repository.UserReplyRepository;
+import com.ucan.backend.userprofile.UserProfileAPI;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class UserReplyService implements UserReplyAPI {
   private final UserReplyMapper replyMapper;
   private final ApplicationEventPublisher eventPublisher;
   private final UserCommentRepository commentRepository;
+  private final UserProfileAPI userProfileAPI;
 
   @Override
   public UserReplyDTO createReply(UserReplyDTO replyDTO) {
@@ -31,12 +33,14 @@ public class UserReplyService implements UserReplyAPI {
     UserReplyDTO savedDto = replyMapper.toDTO(saved);
 
     var commentInfo = getCommentInfo(saved.getCommentId());
+    var replyAuthor = userProfileAPI.getByUserId(saved.getAuthorId());
     eventPublisher.publishEvent(
         new NewReplyCreated(
             saved.getCommentId(),
             commentInfo.authorId(),
             saved.getContent(),
-            commentInfo.postId()));
+            commentInfo.postId(),
+            replyAuthor.fullName()));
 
     return savedDto;
   }
