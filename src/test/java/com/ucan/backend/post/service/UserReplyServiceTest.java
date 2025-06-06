@@ -59,7 +59,7 @@ class UserReplyServiceTest {
             .build();
     UserReplyDTO savedDto = new UserReplyDTO(1L, commentId, authorId, content, now);
     UserCommentEntity comment =
-        UserCommentEntity.builder().id(commentId).authorId(commentAuthorId).build();
+        UserCommentEntity.builder().id(commentId).authorId(commentAuthorId).postId(555L).build();
 
     when(mapper.toEntity(dto)).thenReturn(entity);
     when(repository.save(entity)).thenReturn(entity);
@@ -72,9 +72,10 @@ class UserReplyServiceTest {
     // Then
     verify(eventPublisher).publishEvent(eventCaptor.capture());
     NewReplyCreated event = eventCaptor.getValue();
-    assertThat(event.commentId()).isEqualTo(1L);
+    assertThat(event.commentId()).isEqualTo(commentId);
     assertThat(event.commentAuthorId()).isEqualTo(commentAuthorId);
     assertThat(event.replyContent()).isEqualTo(content);
+    assertThat(event.postId()).isEqualTo(555L);
     assertThat(result).isEqualTo(savedDto);
   }
 

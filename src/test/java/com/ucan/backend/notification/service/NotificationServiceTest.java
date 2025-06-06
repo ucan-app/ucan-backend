@@ -27,7 +27,7 @@ class NotificationServiceTest {
 
   @Test
   void sendNotification_ShouldSaveNotification() {
-    service.sendNotification(5L, "Test");
+    service.sendNotification(5L, "Test", null, null);
 
     verify(repository).save(any(NotificationEntity.class));
   }
@@ -35,7 +35,7 @@ class NotificationServiceTest {
   @Test
   void getNotifications_ShouldReturnList() {
     NotificationEntity entity = new NotificationEntity();
-    NotificationDTO dto = new NotificationDTO(1L, 5L, "Test", false, null);
+    NotificationDTO dto = new NotificationDTO(1L, 5L, "Test", false, null, null, null);
 
     when(repository.findByRecipientIdOrderByCreatedAtDesc(5L)).thenReturn(List.of(entity));
     when(mapper.toDTO(entity)).thenReturn(dto);
@@ -85,7 +85,7 @@ class NotificationServiceTest {
   @Test
   void getNotificationsAndMarkAsRead_ShouldMarkAndReturnNotifications() {
     NotificationEntity entity = new NotificationEntity();
-    NotificationDTO dto = new NotificationDTO(1L, 10L, "Test", false, null);
+    NotificationDTO dto = new NotificationDTO(1L, 10L, "Test", false, null, null, null);
 
     when(repository.findByRecipientIdAndReadAtIsNull(10L)).thenReturn(List.of(entity));
     when(repository.findByRecipientIdOrderByCreatedAtDesc(10L)).thenReturn(List.of(entity));

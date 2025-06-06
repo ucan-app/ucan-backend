@@ -24,7 +24,8 @@ public class NotificationListener {
   @ApplicationModuleListener
   public void handleNewReply(NewReplyCreated event) {
     String message = "Someone replied to your comment: " + summarize(event.replyContent());
-    notificationService.sendNotification(event.commentAuthorId(), message, event.postId(), event.commentId());
+    notificationService.sendNotification(
+        event.commentAuthorId(), message, event.postId(), event.commentId());
   }
 
   private String summarize(String content) {

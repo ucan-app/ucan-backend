@@ -32,7 +32,11 @@ public class UserReplyService implements UserReplyAPI {
 
     var commentInfo = getCommentInfo(saved.getCommentId());
     eventPublisher.publishEvent(
-        new NewReplyCreated(saved.getCommentId(), commentInfo.authorId(), saved.getContent(), commentInfo.postId()));
+        new NewReplyCreated(
+            saved.getCommentId(),
+            commentInfo.authorId(),
+            saved.getContent(),
+            commentInfo.postId()));
 
     return savedDto;
   }
