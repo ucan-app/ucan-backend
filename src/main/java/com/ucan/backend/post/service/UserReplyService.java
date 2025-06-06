@@ -7,6 +7,7 @@ import com.ucan.backend.post.mapper.UserReplyMapper;
 import com.ucan.backend.post.model.UserReplyEntity;
 import com.ucan.backend.post.repository.UserCommentRepository;
 import com.ucan.backend.post.repository.UserReplyRepository;
+import com.ucan.backend.userprofile.UserProfileAPI;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class UserReplyService implements UserReplyAPI {
   private final UserReplyMapper replyMapper;
   private final ApplicationEventPublisher eventPublisher;
   private final UserCommentRepository commentRepository;
+  private final UserProfileAPI userProfileAPI;
 
   @Override
   public UserReplyDTO createReply(UserReplyDTO replyDTO) {
@@ -30,19 +32,27 @@ public class UserReplyService implements UserReplyAPI {
     UserReplyEntity saved = replyRepository.save(entity);
     UserReplyDTO savedDto = replyMapper.toDTO(saved);
 
-    Long commentAuthorId = getCommentAuthorId(saved.getCommentId());
+    var commentInfo = getCommentInfo(saved.getCommentId());
+    var replyAuthor = userProfileAPI.getByUserId(saved.getAuthorId());
     eventPublisher.publishEvent(
-        new NewReplyCreated(saved.getId(), commentAuthorId, saved.getContent()));
+        new NewReplyCreated(
+            saved.getCommentId(),
+            commentInfo.authorId(),
+            saved.getContent(),
+            commentInfo.postId(),
+            replyAuthor.fullName()));
 
     return savedDto;
   }
 
-  private Long getCommentAuthorId(Long commentId) {
+  private CommentInfo getCommentInfo(Long commentId) {
     return commentRepository
         .findById(commentId)
-        .map(comment -> comment.getAuthorId())
+        .map(comment -> new CommentInfo(comment.getAuthorId(), comment.getPostId()))
         .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
   }
+
+  private record CommentInfo(Long authorId, Long postId) {}
 
   @Override
   public List<UserReplyDTO> getRepliesByCommentId(Long commentId) {

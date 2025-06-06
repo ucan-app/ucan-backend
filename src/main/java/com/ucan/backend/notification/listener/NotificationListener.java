@@ -17,14 +17,19 @@ public class NotificationListener {
 
   @ApplicationModuleListener
   public void handleNewComment(NewCommentCreated event) {
-    String message = "Someone commented on your post: " + event.postTitle();
-    notificationService.sendNotification(event.postAuthorId(), message);
+    String message =
+        event.commentAuthorUsername() + " commented on your post: " + event.postTitle();
+    notificationService.sendNotification(event.postAuthorId(), message, event.postId(), null);
   }
 
   @ApplicationModuleListener
   public void handleNewReply(NewReplyCreated event) {
-    String message = "Someone replied to your comment: " + summarize(event.replyContent());
-    notificationService.sendNotification(event.commentAuthorId(), message);
+    String message =
+        event.replyAuthorUsername()
+            + " replied to your comment: "
+            + summarize(event.replyContent());
+    notificationService.sendNotification(
+        event.commentAuthorId(), message, event.postId(), event.commentId());
   }
 
   private String summarize(String content) {

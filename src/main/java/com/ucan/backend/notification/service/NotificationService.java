@@ -26,6 +26,17 @@ public class NotificationService implements NotificationAPI {
     repository.save(notification);
   }
 
+  public void sendNotification(Long recipientId, String message, Long postId, Long commentId) {
+    NotificationEntity notification =
+        NotificationEntity.builder()
+            .recipientId(recipientId)
+            .message(message)
+            .postId(postId)
+            .commentId(commentId)
+            .build();
+    repository.save(notification);
+  }
+
   public List<NotificationDTO> getNotifications(Long userId) {
     return repository.findByRecipientIdOrderByCreatedAtDesc(userId).stream()
         .map(mapper::toDTO)
@@ -38,6 +49,7 @@ public class NotificationService implements NotificationAPI {
         .ifPresent(
             n -> {
               n.setRead(true);
+              n.setReadAt(LocalDateTime.now());
               repository.save(n);
             });
   }
@@ -47,8 +59,10 @@ public class NotificationService implements NotificationAPI {
         repository.findByRecipientIdAndReadAtIsNull(userId);
     if (unreadNotifications.isEmpty()) return;
 
+    LocalDateTime now = LocalDateTime.now();
     for (NotificationEntity notification : unreadNotifications) {
-      notification.setReadAt(LocalDateTime.now());
+      notification.setRead(true);
+      notification.setReadAt(now);
     }
     repository.saveAll(unreadNotifications);
   }

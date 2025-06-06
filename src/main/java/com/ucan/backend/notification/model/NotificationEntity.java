@@ -36,4 +36,10 @@ public class NotificationEntity {
 
   @Column(name = "read_at")
   private LocalDateTime readAt;
+
+  @Column(name = "post_id")
+  private Long postId;
+
+  @Column(name = "comment_id")
+  private Long commentId;
 }

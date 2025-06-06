@@ -54,7 +54,7 @@ public class UserProfileService implements UserProfileAPI {
     return repository
         .findByUserId(userId)
         .map(mapper::toDTO)
-        .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+        .orElseThrow(() -> new IllegalArgumentException("Profile not found for userId: " + userId));
   }
 
   @Override

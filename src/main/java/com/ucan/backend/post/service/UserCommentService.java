@@ -7,6 +7,7 @@ import com.ucan.backend.post.mapper.UserCommentMapper;
 import com.ucan.backend.post.model.UserCommentEntity;
 import com.ucan.backend.post.repository.UserCommentRepository;
 import com.ucan.backend.post.repository.UserPostRepository;
+import com.ucan.backend.userprofile.UserProfileAPI;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class UserCommentService implements UserCommentAPI {
   private final UserCommentMapper mapper;
   private final ApplicationEventPublisher eventPublisher;
   private final UserPostRepository postRepository;
+  private final UserProfileAPI userProfileAPI;
 
   @Override
   public UserCommentDTO createComment(Long postId, UserCommentDTO dto) {
@@ -33,7 +35,9 @@ public class UserCommentService implements UserCommentAPI {
 
     String postTitle = getPostTitle(postId);
     Long postAuthorId = getPostAuthorId(postId);
-    eventPublisher.publishEvent(new NewCommentCreated(postId, postTitle, postAuthorId));
+    var commentAuthor = userProfileAPI.getByUserId(savedEntity.getAuthorId());
+    eventPublisher.publishEvent(
+        new NewCommentCreated(postId, postTitle, postAuthorId, commentAuthor.fullName()));
 
     return savedDto;
   }
