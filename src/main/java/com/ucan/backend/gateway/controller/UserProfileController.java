@@ -33,18 +33,23 @@ public class UserProfileController {
    */
   @GetMapping("/{userId}")
   public ResponseEntity<ProfileResponse> getByUserId(@PathVariable Long userId) {
-    UserProfileDTO profileDTO = profileAPI.getByUserId(userId);
-    UserAuthDTO authDTO = authAPI.findByUsername(profileDTO.fullName());
-    ProfileResponse profileResponse =
-        new ProfileResponse(
-            profileDTO.userId(),
-            profileDTO.fullName(),
-            profileDTO.linkedinUrl(),
-            profileDTO.personalWebsite(),
-            profileDTO.bio(),
-            profileDTO.graduationYear(),
-            authDTO.enabled(),
-            authDTO.badges());
-    return ResponseEntity.ok(profileResponse);
+    try {
+      UserProfileDTO profileDTO = profileAPI.getByUserId(userId);
+      UserAuthDTO authDTO = authAPI.findByUsername(profileDTO.fullName());
+      ProfileResponse profileResponse =
+          new ProfileResponse(
+              profileDTO.userId(),
+              profileDTO.fullName(),
+              profileDTO.linkedinUrl(),
+              profileDTO.personalWebsite(),
+              profileDTO.bio(),
+              profileDTO.graduationYear(),
+              authDTO.enabled(),
+              authDTO.badges());
+      return ResponseEntity.ok(profileResponse);
+    } catch (IllegalArgumentException e) {
+      // Return 404 for profile not found instead of 500 error
+      return ResponseEntity.notFound().build();
+    }
   }
 }

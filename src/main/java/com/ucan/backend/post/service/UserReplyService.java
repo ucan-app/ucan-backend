@@ -30,19 +30,21 @@ public class UserReplyService implements UserReplyAPI {
     UserReplyEntity saved = replyRepository.save(entity);
     UserReplyDTO savedDto = replyMapper.toDTO(saved);
 
-    Long commentAuthorId = getCommentAuthorId(saved.getCommentId());
+    var commentInfo = getCommentInfo(saved.getCommentId());
     eventPublisher.publishEvent(
-        new NewReplyCreated(saved.getId(), commentAuthorId, saved.getContent()));
+        new NewReplyCreated(saved.getCommentId(), commentInfo.authorId(), saved.getContent(), commentInfo.postId()));
 
     return savedDto;
   }
 
-  private Long getCommentAuthorId(Long commentId) {
+  private CommentInfo getCommentInfo(Long commentId) {
     return commentRepository
         .findById(commentId)
-        .map(comment -> comment.getAuthorId())
+        .map(comment -> new CommentInfo(comment.getAuthorId(), comment.getPostId()))
         .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
   }
+
+  private record CommentInfo(Long authorId, Long postId) {}
 
   @Override
   public List<UserReplyDTO> getRepliesByCommentId(Long commentId) {
