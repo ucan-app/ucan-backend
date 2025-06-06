@@ -99,12 +99,8 @@ class UserProfileControllerTest {
     // Arrange
     when(profileAPI.getByUserId(999L)).thenThrow(new IllegalArgumentException("Profile not found"));
 
-    // Act
-    ResponseEntity<ProfileResponse> response = controller.getByUserId(999L);
-
-    // Assert
-    assertEquals(404, response.getStatusCode().value());
-    assertNull(response.getBody());
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> controller.getByUserId(999L));
     verify(profileAPI).getByUserId(999L);
     verify(authAPI, never()).findByUsername(anyString());
   }
@@ -116,12 +112,8 @@ class UserProfileControllerTest {
     when(authAPI.findByUsername(profileDTO.fullName()))
         .thenThrow(new IllegalArgumentException("User not found"));
 
-    // Act
-    ResponseEntity<ProfileResponse> response = controller.getByUserId(42L);
-
-    // Assert
-    assertEquals(404, response.getStatusCode().value());
-    assertNull(response.getBody());
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> controller.getByUserId(42L));
     verify(profileAPI).getByUserId(42L);
     verify(authAPI).findByUsername(profileDTO.fullName());
   }
