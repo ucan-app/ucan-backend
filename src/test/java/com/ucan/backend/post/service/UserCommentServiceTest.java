@@ -11,8 +11,6 @@ import com.ucan.backend.post.model.UserCommentEntity;
 import com.ucan.backend.post.model.UserPostEntity;
 import com.ucan.backend.post.repository.UserCommentRepository;
 import com.ucan.backend.post.repository.UserPostRepository;
-import com.ucan.backend.userprofile.UserProfileAPI;
-import com.ucan.backend.userprofile.UserProfileDTO;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -32,15 +30,13 @@ class UserCommentServiceTest {
   @Mock private UserCommentMapper mapper;
   @Mock private ApplicationEventPublisher eventPublisher;
   @Mock private UserPostRepository postRepository;
-  @Mock private UserProfileAPI userProfileAPI;
   @Captor private ArgumentCaptor<NewCommentCreated> eventCaptor;
 
   private UserCommentService service;
 
   @BeforeEach
   void setUp() {
-    service =
-        new UserCommentService(repository, mapper, eventPublisher, postRepository, userProfileAPI);
+    service = new UserCommentService(repository, mapper, eventPublisher, postRepository);
   }
 
   @Test
@@ -69,15 +65,10 @@ class UserCommentServiceTest {
     post.setTitle(postTitle);
     post.setCreatorId(postAuthorId);
 
-    UserProfileDTO commentAuthorProfile =
-        new UserProfileDTO(
-            1L, commentAuthorId, "Test User", null, null, null, null, null, now, now);
-
     when(mapper.toEntity(dto)).thenReturn(entity);
     when(repository.save(entity)).thenReturn(entity);
     when(mapper.toDTO(entity)).thenReturn(savedDto);
     when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-    when(userProfileAPI.getByUserId(commentAuthorId)).thenReturn(commentAuthorProfile);
 
     // When
     UserCommentDTO result = service.createComment(postId, dto);
@@ -88,7 +79,6 @@ class UserCommentServiceTest {
     assertThat(event.postId()).isEqualTo(postId);
     assertThat(event.postTitle()).isEqualTo(postTitle);
     assertThat(event.postAuthorId()).isEqualTo(postAuthorId);
-    assertThat(event.commentAuthorUsername()).isEqualTo("Test User");
     assertThat(result).isEqualTo(savedDto);
   }
 

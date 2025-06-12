@@ -17,7 +17,7 @@ public class NotificationController {
   @GetMapping
   public ResponseEntity<List<NotificationDTO>> getNotifications(
       @RequestParam("userId") Long userId) {
-    return ResponseEntity.ok(notificationAPI.getNotifications(userId));
+    return ResponseEntity.ok(notificationAPI.getNotificationsAndMarkAsRead(userId));
   }
 
   @GetMapping("/unread-count")

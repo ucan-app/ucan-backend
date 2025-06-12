@@ -92,7 +92,7 @@ class UserProfileServiceTest {
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> service.getByUserId(404L));
 
-    assertEquals("Profile not found for userId: 404", exception.getMessage());
+    assertEquals("Profile not found", exception.getMessage());
     verify(repository, times(1)).findByUserId(404L);
   }
 

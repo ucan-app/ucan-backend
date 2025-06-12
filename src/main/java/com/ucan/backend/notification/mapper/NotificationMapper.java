@@ -13,9 +13,7 @@ public class NotificationMapper {
         entity.getRecipientId(),
         entity.getMessage(),
         entity.isRead(),
-        entity.getCreatedAt(),
-        entity.getPostId(),
-        entity.getCommentId());
+        entity.getCreatedAt());
   }
 
   public NotificationEntity toEntity(NotificationDTO dto) {
@@ -24,8 +22,6 @@ public class NotificationMapper {
         .recipientId(dto.recipientId())
         .message(dto.message())
         .read(dto.read())
-        .postId(dto.postId())
-        .commentId(dto.commentId())
         .build();
   }
 }
