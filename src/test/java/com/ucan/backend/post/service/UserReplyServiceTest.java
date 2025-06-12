@@ -11,8 +11,6 @@ import com.ucan.backend.post.model.UserCommentEntity;
 import com.ucan.backend.post.model.UserReplyEntity;
 import com.ucan.backend.post.repository.UserCommentRepository;
 import com.ucan.backend.post.repository.UserReplyRepository;
-import com.ucan.backend.userprofile.UserProfileAPI;
-import com.ucan.backend.userprofile.UserProfileDTO;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -32,15 +30,13 @@ class UserReplyServiceTest {
   @Mock private UserReplyMapper mapper;
   @Mock private ApplicationEventPublisher eventPublisher;
   @Mock private UserCommentRepository commentRepository;
-  @Mock private UserProfileAPI userProfileAPI;
   @Captor private ArgumentCaptor<NewReplyCreated> eventCaptor;
 
   private UserReplyService service;
 
   @BeforeEach
   void setup() {
-    service =
-        new UserReplyService(repository, mapper, eventPublisher, commentRepository, userProfileAPI);
+    service = new UserReplyService(repository, mapper, eventPublisher, commentRepository);
   }
 
   @Test
@@ -63,15 +59,12 @@ class UserReplyServiceTest {
             .build();
     UserReplyDTO savedDto = new UserReplyDTO(1L, commentId, authorId, content, now);
     UserCommentEntity comment =
-        UserCommentEntity.builder().id(commentId).authorId(commentAuthorId).postId(555L).build();
-    UserProfileDTO replyAuthorProfile =
-        new UserProfileDTO(1L, authorId, "Reply Author", null, null, null, null, null, now, now);
+        UserCommentEntity.builder().id(commentId).authorId(commentAuthorId).build();
 
     when(mapper.toEntity(dto)).thenReturn(entity);
     when(repository.save(entity)).thenReturn(entity);
     when(mapper.toDTO(entity)).thenReturn(savedDto);
     when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
-    when(userProfileAPI.getByUserId(authorId)).thenReturn(replyAuthorProfile);
 
     // When
     UserReplyDTO result = service.createReply(dto);
@@ -79,11 +72,9 @@ class UserReplyServiceTest {
     // Then
     verify(eventPublisher).publishEvent(eventCaptor.capture());
     NewReplyCreated event = eventCaptor.getValue();
-    assertThat(event.commentId()).isEqualTo(commentId);
+    assertThat(event.commentId()).isEqualTo(1L);
     assertThat(event.commentAuthorId()).isEqualTo(commentAuthorId);
     assertThat(event.replyContent()).isEqualTo(content);
-    assertThat(event.postId()).isEqualTo(555L);
-    assertThat(event.replyAuthorUsername()).isEqualTo("Reply Author");
     assertThat(result).isEqualTo(savedDto);
   }
 
