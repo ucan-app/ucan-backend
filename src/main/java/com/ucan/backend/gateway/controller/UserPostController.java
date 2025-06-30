@@ -5,6 +5,7 @@ import com.ucan.backend.post.UserPostDTO;
 import com.ucan.backend.post.service.PostImageService;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +30,15 @@ public class UserPostController {
       @RequestParam String title,
       @RequestParam String description,
       @RequestParam Long creatorId,
+      @RequestParam(required = false) Set<Long> tagIds,
       @RequestParam(required = false) MultipartFile image) {
-    UserPostDTO post = postService.createPost(title, description, creatorId);
+
+    UserPostDTO post;
+    if (tagIds != null && !tagIds.isEmpty()) {
+      post = postService.createPostWithTags(title, description, creatorId, tagIds);
+    } else {
+      post = postService.createPost(title, description, creatorId);
+    }
 
     if (image != null && !image.isEmpty()) {
       try {
@@ -66,6 +74,16 @@ public class UserPostController {
     return ResponseEntity.ok(postService.getPostsByCreator(creatorId));
   }
 
+  @GetMapping("/tag/{tag}")
+  public ResponseEntity<List<UserPostDTO>> getPostsByTag(@PathVariable String tag) {
+    return ResponseEntity.ok(postService.getPostsByTag(tag));
+  }
+
+  @GetMapping("/tags")
+  public ResponseEntity<List<UserPostDTO>> getPostsByTagIds(@RequestParam Set<Long> tagIds) {
+    return ResponseEntity.ok(postService.getPostsByTagIds(tagIds));
+  }
+
   @DeleteMapping("/{postId}")
   public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
     postService.deletePost(postId);
@@ -74,8 +92,16 @@ public class UserPostController {
 
   @PutMapping("/{postId}")
   public ResponseEntity<UserPostDTO> updatePost(
-      @PathVariable Long postId, @RequestParam String title, @RequestParam String description) {
-    return ResponseEntity.ok(postService.updatePost(postId, title, description));
+      @PathVariable Long postId,
+      @RequestParam String title,
+      @RequestParam String description,
+      @RequestParam(required = false) Set<Long> tagIds) {
+
+    if (tagIds != null) {
+      return ResponseEntity.ok(postService.updatePostWithTags(postId, title, description, tagIds));
+    } else {
+      return ResponseEntity.ok(postService.updatePost(postId, title, description));
+    }
   }
 
   // It toggles upvote for a post. If user already upvoted, remove it

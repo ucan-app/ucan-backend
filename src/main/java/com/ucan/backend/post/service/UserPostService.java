@@ -6,7 +6,9 @@ import com.ucan.backend.post.UserPostDTO;
 import com.ucan.backend.post.mapper.UserPostMapper;
 import com.ucan.backend.post.model.UserPostEntity;
 import com.ucan.backend.post.repository.UserPostRepository;
+import com.ucan.backend.tag.service.TagService;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ public class UserPostService implements UserPostAPI {
   private final UserPostRepository postRepository;
   private final UserPostMapper postMapper;
   private final ApplicationEventPublisher eventPublisher;
+  private final TagService tagService;
 
   @Override
   @Transactional
@@ -94,10 +97,63 @@ public class UserPostService implements UserPostAPI {
     return postRepository.findAllByOrderByCreatedAtDesc(pageRequest).map(postMapper::toDTO);
   }
 
-  // TODO: Implement these methods when post functionality is added
   @Override
+  @Transactional
+  public UserPostDTO createPostWithTags(
+      String title, String description, Long creatorId, Set<Long> tagIds) {
+    UserPostEntity post = new UserPostEntity();
+    post.setTitle(title);
+    post.setUpvote(0);
+    post.setDownvote(0);
+    post.setDescription(description);
+    post.setCreatorId(creatorId);
+
+    if (tagIds != null && !tagIds.isEmpty()) {
+      post.setTags(tagService.getTagEntitiesByIds(tagIds));
+    }
+
+    UserPostEntity savedPost = postRepository.save(post);
+    UserPostDTO postDTO = postMapper.toDTO(savedPost);
+
+    eventPublisher.publishEvent(
+        new NewPostCreated(
+            savedPost.getId(),
+            savedPost.getTitle(),
+            savedPost.getUpvote(),
+            savedPost.getDownvote(),
+            savedPost.getCreatorId(),
+            savedPost.getCreatedAt()));
+
+    return postDTO;
+  }
+
+  @Override
+  @Transactional
+  public UserPostDTO updatePostWithTags(
+      Long postId, String title, String description, Set<Long> tagIds) {
+    UserPostEntity post =
+        postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+
+    post.setTitle(title);
+    post.setDescription(description);
+
+    if (tagIds != null) {
+      post.setTags(tagService.getTagEntitiesByIds(tagIds));
+    }
+
+    return postMapper.toDTO(postRepository.save(post));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public List<UserPostDTO> getPostsByTag(String tag) {
-    return List.of();
+    return postRepository.findByTagsNameIgnoreCase(tag).stream().map(postMapper::toDTO).toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<UserPostDTO> getPostsByTagIds(Set<Long> tagIds) {
+    return postRepository.findByTagsIdIn(tagIds).stream().map(postMapper::toDTO).toList();
   }
 
   @Transactional

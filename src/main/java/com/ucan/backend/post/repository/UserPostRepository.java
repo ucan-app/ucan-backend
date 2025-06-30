@@ -2,6 +2,7 @@ package com.ucan.backend.post.repository;
 
 import com.ucan.backend.post.model.UserPostEntity;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,8 @@ public interface UserPostRepository extends JpaRepository<UserPostEntity, Long> 
   List<UserPostEntity> findByCreatorId(Long creatorId);
 
   Page<UserPostEntity> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+  List<UserPostEntity> findByTagsNameIgnoreCase(String tagName);
+
+  List<UserPostEntity> findByTagsIdIn(Set<Long> tagIds);
 }

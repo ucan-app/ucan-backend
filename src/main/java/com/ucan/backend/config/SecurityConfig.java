@@ -72,6 +72,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/profile/*")
                     .permitAll()
+                    .requestMatchers("/api/tags/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .formLogin(form -> form.disable())
