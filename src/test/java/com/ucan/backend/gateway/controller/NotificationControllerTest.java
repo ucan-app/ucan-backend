@@ -1,7 +1,8 @@
 package com.ucan.backend.gateway.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.ucan.backend.notification.NotificationAPI;
 import com.ucan.backend.notification.NotificationDTO;

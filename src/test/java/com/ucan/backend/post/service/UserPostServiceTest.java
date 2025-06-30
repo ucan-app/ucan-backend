@@ -10,7 +10,9 @@ import com.ucan.backend.post.UserPostDTO;
 import com.ucan.backend.post.mapper.UserPostMapper;
 import com.ucan.backend.post.model.UserPostEntity;
 import com.ucan.backend.post.repository.UserPostRepository;
+import com.ucan.backend.tag.service.TagService;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,13 +30,14 @@ class UserPostServiceTest {
   @Mock private UserPostRepository postRepository;
   @Mock private UserPostMapper postMapper;
   @Mock private ApplicationEventPublisher eventPublisher;
+  @Mock private TagService tagService;
   @Captor private ArgumentCaptor<NewPostCreated> eventCaptor;
 
   private UserPostService postService;
 
   @BeforeEach
   void setUp() {
-    postService = new UserPostService(postRepository, postMapper, eventPublisher);
+    postService = new UserPostService(postRepository, postMapper, eventPublisher, tagService);
   }
 
   @Test
@@ -61,7 +64,16 @@ class UserPostServiceTest {
 
     UserPostDTO dto =
         new UserPostDTO(
-            postId, title, upvote, downvote, description, creatorId, imageURL, now, now);
+            postId,
+            title,
+            upvote,
+            downvote,
+            description,
+            creatorId,
+            imageURL,
+            new HashSet<>(),
+            now,
+            now);
 
     when(postRepository.save(any(UserPostEntity.class))).thenReturn(entity);
     when(postMapper.toDTO(entity)).thenReturn(dto);
@@ -92,6 +104,7 @@ class UserPostServiceTest {
             "Desc",
             2L,
             "http://example.com/image.jpg",
+            new HashSet<>(),
             LocalDateTime.now(),
             LocalDateTime.now());
 
@@ -131,6 +144,7 @@ class UserPostServiceTest {
             "Desc",
             creatorId,
             "http://example.com/image.jpg",
+            new HashSet<>(),
             LocalDateTime.now(),
             LocalDateTime.now());
 
@@ -173,6 +187,7 @@ class UserPostServiceTest {
             newDescription,
             2L,
             "http://example.com/image.jpg",
+            new HashSet<>(),
             LocalDateTime.now(),
             LocalDateTime.now());
 
