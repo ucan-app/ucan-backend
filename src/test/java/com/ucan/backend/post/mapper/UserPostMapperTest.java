@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.ucan.backend.post.UserPostDTO;
 import com.ucan.backend.post.model.UserPostEntity;
+import com.ucan.backend.tag.mapper.TagMapper;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 
 class UserPostMapperTest {
 
-  private final UserPostMapper mapper = new UserPostMapper();
+  private final TagMapper tagMapper = new TagMapper();
+  private final UserPostMapper mapper = new UserPostMapper(tagMapper);
 
   @Test
   void toDTO_ShouldMapAllFields() {
@@ -59,7 +62,17 @@ class UserPostMapperTest {
     LocalDateTime now = LocalDateTime.now();
 
     UserPostDTO dto =
-        new UserPostDTO(id, title, upvote, downvote, description, creatorId, imageURL, now, now);
+        new UserPostDTO(
+            id,
+            title,
+            upvote,
+            downvote,
+            description,
+            creatorId,
+            imageURL,
+            new HashSet<>(),
+            now,
+            now);
 
     // When
     UserPostEntity entity = mapper.toEntity(dto);

@@ -1,9 +1,12 @@
 package com.ucan.backend.post.model;
 
+import com.ucan.backend.tag.model.TagEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -44,6 +47,13 @@ public class UserPostEntity {
 
   @Column(name = "is_moderated", nullable = false)
   private boolean isModerated;
+
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(
+      name = "post_tags",
+      joinColumns = @JoinColumn(name = "post_id"),
+      inverseJoinColumns = @JoinColumn(name = "tag_id"))
+  private Set<TagEntity> tags = new HashSet<>();
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
